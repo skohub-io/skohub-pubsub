@@ -1,0 +1,19 @@
+{
+  "name": "skohub-pubsub",
+  "version": "0.1.0",
+  "description": "Publish-subscribe server for skohub",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hbz/skohub-pubsub.git"
+  },
+  "author": "Felix Ostrowski <felix.ostrowski@googlemail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/hbz/skohub-pubsub/issues"
+  },
+  "homepage": "https://github.com/hbz/skohub-pubsub#readme"
+}
