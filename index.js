@@ -1,1 +1,1 @@
-console.log('skohub-pubsub')
+require('@babel/register')
