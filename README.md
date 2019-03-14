@@ -2,6 +2,7 @@
 
 ```
 $ git clone https://github.com/hbz/skohub-pubsub.git
+$ cd skohub-pubsub
 $ npm install
 $ npm test
 $ npm start
