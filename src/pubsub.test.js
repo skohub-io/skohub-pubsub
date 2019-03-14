@@ -13,4 +13,12 @@ describe('Test LDN inboxes', () => {
     expect(response.statusCode).toBe(200)
     expect(Object.keys(response.body).length).toBeGreaterThan(0)
   })
+
+  test('accepts notifications for a target', async () => {
+    const response = await request(pubsub).post('/inbox')
+      .query({ target: 'https://lobid.org/gnd/118696432' })
+      .set('Content-Type', 'application/ld+json')
+      .send({ foo: 'bar' })
+    expect(response.statusCode).toBe(202)
+  })
 })

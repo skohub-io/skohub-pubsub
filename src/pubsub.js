@@ -13,4 +13,11 @@ pubsub.get('/inbox', (req, res) => {
   })
 })
 
+pubsub.post('/inbox', (req, res) => {
+  if (!req.query.target || req.headers['content-type'] !== 'application/ld+json') {
+    return res.status(400).send()
+  }
+  res.status(202).send()
+})
+
 export default pubsub
