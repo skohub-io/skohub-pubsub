@@ -2,10 +2,12 @@ import express from 'express'
 import request from 'superagent'
 import crypto from 'crypto'
 
-const DEFAULT_LEASE_SECONDS = 7
+const DEFAULT_LEASE = 7
+const subscriptions = {}
 
 const pubsub = express()
 
+pubsub.use(express.json({ type: ['application/ld+json', 'application/json'] }))
 pubsub.use(express.urlencoded({ extended: true }))
 
 pubsub.get('/inbox', (req, res) => {
@@ -23,31 +25,47 @@ pubsub.post('/inbox', (req, res) => {
   if (!req.query.target || req.headers['content-type'] !== 'application/ld+json') {
     return res.status(400).send()
   }
+  Object.keys(subscriptions[req.query.target] || {}).forEach(callback => {
+    request.post(callback).send(req.body).then(res => res, err => err)
+  })
   res.status(202).send()
 })
 
 pubsub.post('/hub', async (req, res) => {
-  if (
-    req.headers['content-type'] !== 'application/x-www-form-urlencoded' ||
-    !req.body['hub.callback'] ||
-    !req.body['hub.mode'] ||
-    !req.body['hub.topic']
-  ) {
+  if (req.headers['content-type'] !== 'application/x-www-form-urlencoded') {
     return res.status(400).send()
   }
+
+  const {
+    'hub.callback': callback,
+    'hub.mode': mode,
+    'hub.topic': topic,
+    'hub.lease_seconds': lease = DEFAULT_LEASE
+  } = req.body
+
+  if (!callback || !/subscribe|unsubscribe/.test(mode) || !topic) {
+    return res.status(400).send()
+  }
+
   res.status(202).send()
 
   const challenge = crypto.randomBytes(64).toString('hex')
 
   try {
-    await request.get(req.body['hub.callback'])
-      .query(`hub.mode=${req.body['hub.mode']}`)
-      .query(`hub.topic=${req.body['hub.topic']}`)
+    await request.get(callback)
+      .query(`hub.mode=${mode}`)
+      .query(`hub.topic=${topic}`)
       .query(`hub.challenge=${challenge}`)
-      .query(`hub.lease_seconds=${req.body['hub.lease_seconds'] || DEFAULT_LEASE_SECONDS}`)
-    // TODO: save subscription
+      .query(`hub.lease_seconds=${lease}`)
+
+    if (mode === 'subscribe') {
+      subscriptions[topic] = subscriptions[topic] || {}
+      subscriptions[topic][callback] = lease
+    } else {
+      delete subscriptions[topic][callback]
+    }
   } catch (e) {
-    // TODO: cancel subscription request
+    // discard subscription request
   }
 })
 
