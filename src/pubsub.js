@@ -25,10 +25,10 @@ pubsub.post('/inbox', (req, res) => {
   if (!req.query.target || req.headers['content-type'] !== 'application/ld+json') {
     return res.status(400).send()
   }
+  res.status(202).send()
   Object.keys(subscriptions[req.query.target] || {}).forEach(callback => {
     request.post(callback).send(req.body).then(res => res, err => err)
   })
-  res.status(202).send()
 })
 
 pubsub.post('/hub', async (req, res) => {
