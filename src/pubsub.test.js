@@ -74,8 +74,12 @@ describe('Test WebSub subscriptions', () => {
     const notification = { foo: 'bar' }
     const notificationCallback = (req, res) => {
       if (req.method === 'POST') {
-        req.on('data', chunk => expect(JSON.parse(chunk)).toEqual(notification))
-        req.on('end', done)
+        const data = []
+        req.on('data', chunk => data.push(chunk))
+        req.on('end', () => {
+          expect(JSON.parse(Buffer.concat(data).toString())).toEqual(notification)
+          done()
+        })
         res.end()
         callbackServer.removeListener('request', notificationCallback)
       }
