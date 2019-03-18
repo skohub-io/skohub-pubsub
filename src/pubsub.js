@@ -52,11 +52,15 @@ pubsub.post('/hub', async (req, res) => {
   const challenge = crypto.randomBytes(64).toString('hex')
 
   try {
-    await request.get(callback)
+    const callbackResponse = await request.get(callback)
       .query(`hub.mode=${mode}`)
       .query(`hub.topic=${topic}`)
       .query(`hub.challenge=${challenge}`)
       .query(`hub.lease_seconds=${lease}`)
+
+    if (callbackResponse.text !== challenge) {
+      throw new Error('Invalid challenge in response')
+    }
 
     if (mode === 'subscribe') {
       subscriptions[topic] = subscriptions[topic] || {}
