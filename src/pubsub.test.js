@@ -1,7 +1,16 @@
 import request from 'supertest'
 import http from 'http'
 import querystring from 'querystring'
+import nock from 'nock'
 import pubsub from './pubsub'
+
+nock('https://lobid.org')
+  .persist()
+  .defaultReplyHeaders({
+    'Link': '<http://localhost:3000/hub>; rel="hub", <https://lobid.org/gnd/118696432>; rel="self'
+  })
+  .get('/gnd/118696432')
+  .reply(200)
 
 const callbackServer = http.createServer()
 beforeAll((done) => callbackServer.listen(0, done))
@@ -101,5 +110,22 @@ describe('Test WebSub subscriptions', () => {
         .set('Content-Type', 'application/ld+json')
         .send(notification)
     }, 0)
+  })
+
+  test('rejects subscription request for invalid topics', async () => {
+    const topicURL = `http://localhost:${callbackServer.address().port}/topic`
+    const linkHeadersCallback = (req, res) => {
+      res.end()
+      callbackServer.removeListener('request', linkHeadersCallback)
+    }
+    callbackServer.on('request', linkHeadersCallback)
+
+    const parameters = Object.entries({
+      'hub.callback': `/callback`,
+      'hub.mode': 'subscribe',
+      'hub.topic': topicURL
+    }).map(([key, val]) => `${key}=${encodeURIComponent(val)}`).join('&')
+    const subscriptionRespone = await request(pubsub).post('/hub').send(parameters)
+    expect(subscriptionRespone.statusCode).toBe(400)
   })
 })
