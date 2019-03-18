@@ -1,0 +1,32 @@
+{
+  "name": "skohub-pubsub",
+  "version": "0.1.0",
+  "description": "Publish-subscribe server for skohub",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hbz/skohub-pubsub.git"
+  },
+  "author": "Felix Ostrowski <felix.ostrowski@googlemail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/hbz/skohub-pubsub/issues"
+  },
+  "homepage": "https://github.com/hbz/skohub-pubsub#readme",
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/register": "^7.0.0",
+    "eslint": "^5.15.1",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
+}
