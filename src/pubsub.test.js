@@ -4,11 +4,14 @@ import querystring from 'querystring'
 import nock from 'nock'
 import pubsub from './pubsub'
 
+const linkHeaders = [
+  '<http://localhost:3000/hub>; rel="hub"',
+  '<https://lobid.org/gnd/118696432>; rel="self"',
+  '<http://localhost:3000/inbox?target=https://lobid.org/gnd/118696432>; rel="http://www.w3.org/ns/ldp#inbox"'
+]
 nock('https://lobid.org')
   .persist()
-  .defaultReplyHeaders({
-    'Link': '<http://localhost:3000/hub>; rel="hub", <https://lobid.org/gnd/118696432>; rel="self'
-  })
+  .defaultReplyHeaders({ 'Link': linkHeaders.join(', ') })
   .get('/gnd/118696432')
   .reply(200)
 
@@ -127,5 +130,20 @@ describe('Test WebSub subscriptions', () => {
     }).map(([key, val]) => `${key}=${encodeURIComponent(val)}`).join('&')
     const subscriptionRespone = await request(pubsub).post('/hub').send(parameters)
     expect(subscriptionRespone.statusCode).toBe(400)
+  })
+
+  test('rejects notifications for invalid targets', async () => {
+    const targetURL = `http://localhost:${callbackServer.address().port}/topic`
+    const linkHeadersCallback = (req, res) => {
+      res.end()
+      callbackServer.removeListener('request', linkHeadersCallback)
+    }
+    callbackServer.on('request', linkHeadersCallback)
+
+    const response = await request(pubsub).post('/inbox')
+      .query({ target: targetURL })
+      .set('Content-Type', 'application/ld+json')
+      .send({ foo: 'bar' })
+    expect(response.statusCode).toBe(400)
   })
 })
