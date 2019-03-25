@@ -17,14 +17,15 @@ To test pubsub interactively, start the server in one terminal:
 
     $ npm start
 
-Start the publisher in another one, take a note of the $address and $port to
-provide a valid URL in the next step below:
+Start the publisher, take a note of the $address and $port to provide a valid
+URL in the next step below:
 
     $ node src/publisher.js
 
-Start the subscriber in yet another one, providing a publisher URL as a topic:
+Start the subscriber, subscribing a publisher URL (the $address and $port from
+above) and a $topic (where $topic may be e.g https://lobid.org/gnd/118696432 ):
 
-    $ node src/subscriber.js http://$address:$port/hub http://127.0.0.1:51101/topic
+    $ node src/subscriber.js http://localhost:3000/hub http://$address:$port/$topic
 
 Send a notification to the hub and see it logged by the subscriber:
 
@@ -32,3 +33,5 @@ Send a notification to the hub and see it logged by the subscriber:
     > -H "Content-Type: application/ld+json" \
     > -d '{"foo": "bar"}'
 ```
+Also, try to notify the hub with a slightly different topic (e.g.
+https://lobid.org/gnd/118696431) - see the subscriber logging nothing.
