@@ -17,14 +17,14 @@ To test pubsub interactively, start the server in one terminal:
 
     $ npm start
 
-Start the publisher in another one, take a note of the address and port to
+Start the publisher in another one, take a note of the $address and $port to
 provide a valid URL in the next step below:
 
     $ node src/publisher.js
 
 Start the subscriber in yet another one, providing a publisher URL as a topic:
 
-    $ node src/subscriber.js http://localhost:3000/hub http://127.0.0.1:51101/topic
+    $ node src/subscriber.js http://$address:$port/hub http://127.0.0.1:51101/topic
 
 Send a notification to the hub and see it logged by the subscriber:
 
