@@ -24,13 +24,13 @@ topic URL in the next step below:
 Start the subscriber, subscribing to a publisher topic URL (the $address and $port from
 above) and a random path:
 
-    $ node src/subscriber.js http://localhost:3000/hub http://$address:$port/some/random/topic
+    $ node src/subscriber.js http://localhost:3000/hub http://$address:$port/some/random/path
 
 Send a notification to the hub and see it logged by the subscriber:
 
-    $ curl "localhost:3000/inbox?target=http://$address:$port/some/random/topic" \
+    $ curl "localhost:3000/inbox?target=http://$address:$port/some/random/path" \
     -H "Content-Type: application/ld+json" \
     -d '{"foo": "bar"}'
 
 Also, try to notify the hub with a slightly different topic (e.g.
-https://lobid.org/gnd/118696431) - see the subscriber logging nothing.
+http://$address:$port/another/random/path) - see the subscriber logging nothing.
