@@ -17,18 +17,18 @@ To test pubsub interactively, start the server in one terminal:
     $ npm start
 
 Start the publisher, take a note of the $address and $port to provide a valid
-URL in the next step below:
+topic URL in the next step below:
 
     $ node src/publisher.js
 
-Start the subscriber, subscribing a publisher URL (the $address and $port from
-above) and a $topic (where $topic may be e.g `https://lobid.org/gnd/118696432`):
+Start the subscriber, subscribing to a publisher topic URL (the $address and $port from
+above) and a random path:
 
-    $ node src/subscriber.js http://localhost:3000/hub http://$address:$port/$topic
+    $ node src/subscriber.js http://localhost:3000/hub http://$address:$port/some/random/topic
 
 Send a notification to the hub and see it logged by the subscriber:
 
-    $ curl "localhost:3000/inbox?target=https://lobid.org/gnd/118696432" \
+    $ curl "localhost:3000/inbox?target=http://$address:$port/some/random/topic" \
     -H "Content-Type: application/ld+json" \
     -d '{"foo": "bar"}'
 
