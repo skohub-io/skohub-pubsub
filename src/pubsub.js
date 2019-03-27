@@ -99,7 +99,7 @@ const pubsub = db => {
 
   app.post('/hub', async (req, res) => {
     if (req.headers['content-type'] !== 'application/x-www-form-urlencoded') {
-      return res.status(400).send()
+      return res.status(400).send('Unsupported Content-Type')
     }
 
     const {
