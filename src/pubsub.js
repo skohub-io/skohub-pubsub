@@ -139,6 +139,7 @@ const pubsub = db => {
       try {
         await validateRequest(callback, mode, topic)
       } catch (e) {
+        ws.send(JSON.stringify({ mode: 'reject', topic }))
         return // discard subscription request
       }
       if (mode === 'subscribe') {

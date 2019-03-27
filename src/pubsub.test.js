@@ -10,11 +10,17 @@ const linkHeaders = [
   '<https://lobid.org/gnd/118696432>; rel="self"',
   '<http://localhost:3000/inbox?target=https://lobid.org/gnd/118696432>; rel="http://www.w3.org/ns/ldp#inbox"'
 ]
+// Mock request with valid link headers
 nock('https://lobid.org')
   .persist()
-  .defaultReplyHeaders({ 'Link': linkHeaders.join(', ') })
   .get('/gnd/118696432')
-  .reply(200)
+  .reply(200, {}, { 'Link': linkHeaders.join(', ') })
+
+// Mock request without link headers
+nock('https://lobid.org')
+  .persist()
+  .get('/gnd/118520520')
+  .reply(200, {})
 
 const callbackServer = http.createServer()
 beforeAll((done) => callbackServer.listen(0, done))
@@ -118,32 +124,18 @@ describe('Test WebSub subscriptions', () => {
   })
 
   test('rejects subscription request for invalid topics', async () => {
-    const topicURL = `http://localhost:${callbackServer.address().port}/topic`
-    const linkHeadersCallback = (req, res) => {
-      res.end()
-      callbackServer.removeListener('request', linkHeadersCallback)
-    }
-    callbackServer.on('request', linkHeadersCallback)
-
     const parameters = Object.entries({
       'hub.callback': `/callback`,
       'hub.mode': 'subscribe',
-      'hub.topic': topicURL
+      'hub.topic': 'https://lobid.org/gnd/118520520'
     }).map(([key, val]) => `${key}=${encodeURIComponent(val)}`).join('&')
     const subscriptionRespone = await request(pubsub()).post('/hub').send(parameters)
     expect(subscriptionRespone.statusCode).toBe(400)
   })
 
   test('rejects notifications for invalid targets', async () => {
-    const targetURL = `http://localhost:${callbackServer.address().port}/topic`
-    const linkHeadersCallback = (req, res) => {
-      res.end()
-      callbackServer.removeListener('request', linkHeadersCallback)
-    }
-    callbackServer.on('request', linkHeadersCallback)
-
     const response = await request(pubsub()).post('/inbox')
-      .query({ target: targetURL })
+      .query({ target: 'https://lobid.org/gnd/118520520' })
       .set('Content-Type', 'application/ld+json')
       .send({ foo: 'bar' })
     expect(response.statusCode).toBe(400)
@@ -169,6 +161,30 @@ describe('Test Websocket subscriptions', () => {
         message = JSON.parse(message)
         expect(message.mode).toBe('confirm')
         expect(message.topic).toBe('https://lobid.org/gnd/118696432')
+        ws.close()
+        httpServer.close(done)
+      })
+    })
+  })
+
+  test('rejects subscription requests for an invalid topic', done => {
+    const app = pubsub()
+    const httpServer = http.createServer()
+    httpServer.on('upgrade', (request, socket, head) => app.wss.handleUpgrade(
+      request, socket, head, ws => app.wss.emit('connection', ws, request)
+    ))
+    httpServer.listen(0, () => {
+      const ws = new WebSocket(`http://localhost:${httpServer.address().port}`)
+      ws.on('open', () => {
+        ws.send(JSON.stringify({
+          mode: 'subscribe',
+          topic: 'https://lobid.org/gnd/118520520'
+        }))
+      })
+      ws.on('message', message => {
+        message = JSON.parse(message)
+        expect(message.mode).toBe('reject')
+        expect(message.topic).toBe('https://lobid.org/gnd/118520520')
         ws.close()
         httpServer.close(done)
       })
