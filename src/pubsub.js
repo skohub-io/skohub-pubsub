@@ -2,6 +2,7 @@ import express from 'express'
 import request from 'superagent'
 import crypto from 'crypto'
 import parseLinkHeader from 'parse-link-header'
+import WebSocket from 'ws'
 
 const DEFAULT_LEASE = 7
 const LDP_INBOX = 'http://www.w3.org/ns/ldp#inbox'
@@ -121,5 +122,22 @@ pubsub.post('/hub', async (req, res) => {
     delete webSubSubscriptions[topic][callback]
   }
 })
+
+const wss = new WebSocket.Server({ noServer: true })
+wss.on('connection', (ws, req) => {
+  ws.on('message', async message => {
+    const { mode, topic } = JSON.parse(message)
+    const callback = notification => ws.send(notification)
+    try {
+      await validateRequest(callback, mode, topic)
+    } catch (e) {
+      console.error(e)
+      return
+    }
+    ws.send(JSON.stringify({ mode: 'confirm', topic }))
+  })
+})
+
+pubsub.wss = wss
 
 export default pubsub

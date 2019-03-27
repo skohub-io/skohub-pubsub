@@ -2,6 +2,7 @@ import request from 'supertest'
 import http from 'http'
 import querystring from 'querystring'
 import nock from 'nock'
+import WebSocket from 'ws'
 import pubsub from './pubsub'
 
 const linkHeaders = [
@@ -145,5 +146,30 @@ describe('Test WebSub subscriptions', () => {
       .set('Content-Type', 'application/ld+json')
       .send({ foo: 'bar' })
     expect(response.statusCode).toBe(400)
+  })
+})
+
+describe('Test Websocket subscriptions', () => {
+  test('accepts subscription requests for a topic', done => {
+    const httpServer = http.createServer()
+    httpServer.on('upgrade', (request, socket, head) => pubsub.wss.handleUpgrade(
+      request, socket, head, ws => pubsub.wss.emit('connection', ws, request)
+    ))
+    httpServer.listen(0, () => {
+      const ws = new WebSocket(`http://localhost:${httpServer.address().port}`)
+      ws.on('open', () => {
+        ws.send(JSON.stringify({
+          mode: 'subscribe',
+          topic: 'https://lobid.org/gnd/118696432'
+        }))
+      })
+      ws.on('message', message => {
+        message = JSON.parse(message)
+        expect(message.mode).toBe('confirm')
+        expect(message.topic).toBe('https://lobid.org/gnd/118696432')
+        ws.close()
+        httpServer.close(done)
+      })
+    })
   })
 })
