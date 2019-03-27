@@ -172,4 +172,34 @@ describe('Test Websocket subscriptions', () => {
       })
     })
   })
+
+  test('receives notifications for subscribed topics', done => {
+    const httpServer = http.createServer()
+    httpServer.on('upgrade', (request, socket, head) => pubsub.wss.handleUpgrade(
+      request, socket, head, ws => pubsub.wss.emit('connection', ws, request)
+    ))
+    httpServer.listen(0, () => {
+      const ws = new WebSocket(`http://localhost:${httpServer.address().port}`)
+      const notification = { foo: 'bar' }
+      ws.on('open', () => {
+        ws.send(JSON.stringify({
+          mode: 'subscribe',
+          topic: 'https://lobid.org/gnd/118696432'
+        }), async () => {
+          await request(pubsub).post('/inbox')
+            .query({ target: 'https://lobid.org/gnd/118696432' })
+            .set('Content-Type', 'application/ld+json')
+            .send(notification)
+        })
+      })
+      ws.on('message', message => {
+        message = JSON.parse(message)
+        if (message.mode === 'notification') {
+          expect(message.data).toEqual(notification)
+          ws.close()
+          httpServer.close(done)
+        }
+      })
+    })
+  })
 })

@@ -7,6 +7,7 @@ import WebSocket from 'ws'
 const DEFAULT_LEASE = 7
 const LDP_INBOX = 'http://www.w3.org/ns/ldp#inbox'
 const webSubSubscriptions = {}
+const webSocketSubscriptions = {}
 
 const pubsub = express()
 
@@ -56,6 +57,12 @@ pubsub.post('/inbox', async (req, res) => {
 
   Object.keys(webSubSubscriptions[target] || {}).forEach(callback => {
     request.post(callback).send(req.body).then(res => res, err => err)
+  })
+  Object.keys(webSocketSubscriptions[target] || {}).forEach(addr => {
+    webSocketSubscriptions[target][addr](JSON.stringify({
+      mode: 'notification',
+      data: req.body
+    }))
   })
 })
 
@@ -131,10 +138,16 @@ wss.on('connection', (ws, req) => {
     try {
       await validateRequest(callback, mode, topic)
     } catch (e) {
-      console.error(e)
-      return
+      return // discard subscription request
     }
-    ws.send(JSON.stringify({ mode: 'confirm', topic }))
+    if (mode === 'subscribe') {
+      webSocketSubscriptions[topic] = webSocketSubscriptions[topic] || {}
+      webSocketSubscriptions[topic][req.connection.remoteAddress] = callback
+      ws.send(JSON.stringify({ mode: 'confirm', topic }))
+    } else {
+      ws.close()
+      delete webSocketSubscriptions[topic][req.connection.remoteAddress]
+    }
   })
 })
 
