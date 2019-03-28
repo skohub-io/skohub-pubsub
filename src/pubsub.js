@@ -3,11 +3,12 @@ import request from 'superagent'
 import crypto from 'crypto'
 import parseLinkHeader from 'parse-link-header'
 import WebSocket from 'ws'
+import url from 'url'
 
 const DEFAULT_LEASE = 7
 const LDP_INBOX = 'http://www.w3.org/ns/ldp#inbox'
 
-const validateTarget = async target => {
+const validateTarget = async (publicHost, target) => {
   if (!target) {
     throw new Error('Target required')
   }
@@ -16,13 +17,13 @@ const validateTarget = async target => {
   if (
     !linkHeader ||
     !linkHeader[LDP_INBOX] ||
-    linkHeader[LDP_INBOX].url !== `http://localhost:3000/inbox?target=${target}`
+    linkHeader[LDP_INBOX].url !== `${publicHost}/inbox?target=${target}`
   ) {
     throw new Error('Invalid link headers for target URL')
   }
 }
 
-const validateRequest = async (callback, mode, topic, lease = DEFAULT_LEASE) => {
+const validateRequest = async (publicHost, callback, mode, topic, lease = DEFAULT_LEASE) => {
   if (!callback || !/subscribe|unsubscribe/.test(mode) || !topic) {
     throw new Error('Invalid request')
   }
@@ -32,7 +33,7 @@ const validateRequest = async (callback, mode, topic, lease = DEFAULT_LEASE) => 
     !linkHeader ||
     !linkHeader.hub ||
     !linkHeader.self ||
-    linkHeader.hub.url !== 'http://localhost:3000/hub' ||
+    linkHeader.hub.url !== `${publicHost}/hub` ||
     linkHeader.self.url !== topic
   ) {
     throw new Error('Invalid topic or hub URL')
@@ -60,15 +61,23 @@ const pubsub = db => {
   app.use(express.json({ type: ['application/ld+json', 'application/json'] }))
   app.use(express.urlencoded({ extended: true }))
 
+  app.use((req, res, next) => {
+    req.publicHost = url.format({
+      protocol: req.get('x-forwarded-proto') || req.protocol,
+      host: req.get('x-forwarded-host') || req.get('host')
+    })
+    next()
+  })
+
   app.get('/inbox', async (req, res) => {
     try {
-      await validateTarget(req.query.target)
+      await validateTarget(req.publicHost, req.query.target)
     } catch (e) {
       return res.status(400).send(e.message)
     }
     res.status(200).send({
       '@context': 'http://www.w3.org/ns/ldp',
-      '@id': `${req.protocol}://${req.get('host')}${req.url}`,
+      '@id': `${req.publicHost}${req.url}`,
       'contains': []
     })
   })
@@ -79,7 +88,7 @@ const pubsub = db => {
       if (req.headers['content-type'] !== 'application/ld+json') {
         throw new Error('Invalid Content-Type')
       }
-      await validateTarget(target)
+      await validateTarget(req.publicHost, target)
     } catch (e) {
       return res.status(400).send(e.message)
     }
@@ -110,7 +119,7 @@ const pubsub = db => {
     } = req.body
 
     try {
-      await validateRequest(callback, mode, topic, lease)
+      await validateRequest(req.publicHost, callback, mode, topic, lease)
     } catch (e) {
       return res.status(400).send(e.message)
     }
@@ -133,11 +142,15 @@ const pubsub = db => {
 
   const wss = new WebSocket.Server({ noServer: true })
   wss.on('connection', (ws, req) => {
+    req.publicHost = url.format({
+      protocol: req.headers['x-forwarded-proto'] || req.protocol || 'http',
+      host: req.headers['x-forwarded-host'] || req.headers['host']
+    })
     ws.on('message', async message => {
       const { mode, topic } = JSON.parse(message)
       const callback = notification => ws.send(notification)
       try {
-        await validateRequest(callback, mode, topic)
+        await validateRequest(req.publicHost, callback, mode, topic)
       } catch (e) {
         ws.send(JSON.stringify({ mode: 'reject', topic }))
         return // discard subscription request
