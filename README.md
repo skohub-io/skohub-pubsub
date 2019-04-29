@@ -19,7 +19,7 @@ To test pubsub interactively, start the server in one terminal:
 Start the publisher, take a note of the $address and $port to provide a valid
 topic URL in the next step below:
 
-    $ node src/publisher.js
+    $ node src/publisher.js http://127.0.0.1/hub http://127.0.0.1/inbox
 
 Start the subscriber, subscribing to a publisher topic URL (the $address and $port from
 above) and a random path:

@@ -35,12 +35,15 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "jest": "^24.5.0",
+    "jest-websocket-mock": "^1.1.1",
+    "mock-socket": "^8.0.5",
     "nock": "^10.0.6",
     "supertest": "^3.4.2"
   },
   "dependencies": {
     "express": "^4.16.4",
     "parse-link-header": "^1.0.1",
-    "superagent": "^4.1.0"
+    "superagent": "^4.1.0",
+    "ws": "^6.2.0"
   }
 }
