@@ -130,7 +130,6 @@ describe('Test WebSub subscriptions', () => {
     }
     callbackServer.on('request', notificationCallback)
 
-    const app = pubsub()
     const parameters = {
       'hub.callback': `http://localhost:${callbackServer.address().port}/callback`,
       'hub.mode': 'subscribe',
