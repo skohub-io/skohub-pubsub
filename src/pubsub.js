@@ -84,6 +84,16 @@ const pubsub = db => {
     })
   })
 
+  app.options('/inbox', async (req, res) => {
+    try {
+      await validateTarget(req.publicHost, req.query.target)
+    } catch (e) {
+      return res.status(400).send(e.message)
+    }
+    res.header('Accept-Post', 'application/ld+json')
+    res.status(200).send()
+  })
+
   app.post('/inbox', async (req, res) => {
     const target = req.query.target
     const { type } = contentType.parse(req)
