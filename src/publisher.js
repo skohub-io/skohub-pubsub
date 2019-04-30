@@ -9,7 +9,7 @@ const linkHeadersCallback = (req, res) => {
     `<http://${address}:${port}${req.url}>; rel="self"`,
     `<${process.argv[3]}?target=http://${address}:${port}${req.url}>; rel="http://www.w3.org/ns/ldp#inbox"`
   ]
-  res.setHeader('Link', linkHeaders)
+  res.setHeader('Link', linkHeaders.join(', '))
   res.end()
 }
 publisherServer.on('request', linkHeadersCallback)
