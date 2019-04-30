@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import parseLinkHeader from 'parse-link-header'
 import WebSocket from 'ws'
 import url from 'url'
+import contentType from 'content-type'
 
 const DEFAULT_LEASE = 7
 const LDP_INBOX = 'http://www.w3.org/ns/ldp#inbox'
@@ -84,8 +85,9 @@ const pubsub = db => {
 
   app.post('/inbox', async (req, res) => {
     const target = req.query.target
+    const { type } = contentType.parse(req)
     try {
-      if (req.headers['content-type'] !== 'application/ld+json') {
+      if (type !== 'application/ld+json') {
         throw new Error('Invalid Content-Type')
       }
       await validateTarget(req.publicHost, target)
