@@ -76,6 +76,7 @@ const pubsub = db => {
     } catch (e) {
       return res.status(400).send(e.message)
     }
+    res.header('Content-Type', 'application/ld+json')
     res.status(200).send({
       '@context': 'http://www.w3.org/ns/ldp',
       '@id': `${req.publicHost}${req.url}`,
