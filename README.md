@@ -1,5 +1,7 @@
 # skohub-pubsub
 
+This part provides the [SkoHub](http://skohub.io) core infrastructure, setting up basic inboxes for subjects plus the ability of subscribing to push notifications for those inboxes.
+
 Basic setup:
 
     $ git clone https://github.com/hbz/skohub-pubsub.git
