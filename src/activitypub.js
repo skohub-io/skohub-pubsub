@@ -81,6 +81,21 @@ app.get('/u/:id', (req, res) => {
   res.send(actor)
 })
 
+const sendMessage = (from, to, message) => {
+  const date = (new Date()).toUTCString()
+  const { pathname, hostname } = new URL(to.inbox)
+  const signer = crypto.createSign('SHA256')
+  signer.update(`(request-target): post ${pathname}\nhost: ${hostname}\ndate: ${date}`)
+  signer.end()
+  const signature = signer.sign(PRIV_KEY).toString('base64')
+  const header = `keyId="${from.id}",headers="(request-target) host date",signature="${signature}"`
+  return request.post(to.inbox).send(message).set(POST_HEADERS).set({
+    'Host': hostname,
+    'Date': date,
+    'Signature': header
+  })
+}
+
 app.post('/inbox', async (req, res) => {
   const action = req.body
 
@@ -99,25 +114,16 @@ app.post('/inbox', async (req, res) => {
     'object': action,
     'type': 'Accept'
   }
-  const date = (new Date()).toUTCString()
-  const { pathname, hostname } = new URL(actor.inbox)
-  const signer = crypto.createSign('SHA256')
-  signer.update(`(request-target): post ${pathname}\nhost: ${hostname}\ndate: ${date}`)
-  signer.end()
-  const signature = signer.sign(PRIV_KEY).toString('base64')
-  const header = `keyId="${action.object}",headers="(request-target) host date",signature="${signature}"`
+
   try {
-    const resp = await request.post(actor.inbox).send(accept).set(POST_HEADERS).set({
-      'Host': hostname,
-      'Date': date,
-      'Signature': header
-    })
+    const resp = await sendMessage({id: action.object}, actor, accept)
     console.log('SUCCESS', resp.status)
-    res.status(201).send()
   } catch (e) {
     console.error('ERROR', e)
-    res.status(500).send()
+    return res.status(500).send()
   }
+
+  res.status(201).send()
 })
 
 app.listen(3000, function() {
