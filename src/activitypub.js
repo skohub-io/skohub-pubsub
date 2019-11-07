@@ -103,13 +103,35 @@ const sendMessage = (from, to, message) => {
   })
 }
 
+const verifyMessage = async headers => {
+  const parts = headers['signature'].split(',').reduce((acc, curr) => {
+    const [, key, value,] = curr.split(/^([^=]+)=(.+)$/)
+    return Object.assign(acc, { [key]: value.slice(1, -1) })
+  }, {})
+  const compare = parts.headers.split(' ').map(header =>
+    header === '(request-target)'
+      ? '(request-target): post /inbox'
+      : `${header}: ${headers[header]}`
+  ).join('\n')
+  const publicKey = (await request.get(parts.keyId).set(GET_HEADERS)).body.publicKey.publicKeyPem
+  const verifier = crypto.createVerify(parts.algorithm.toUpperCase())
+  verifier.update(compare)
+  verifier.end()
+  return verifier.verify(publicKey, Buffer.from(parts.signature, 'base64'))
+}
+
 app.post('/inbox', async (req, res) => {
   const action = req.body
+  const verified = await verifyMessage(req.headers)
+
+  if (!verified) {
+    console.warn('Could not verify message')
+    return res.send()
+  }
 
   if (action.type !== 'Follow') {
     console.warn('Unhandled action type', action.type)
-    res.send()
-    return
+    return res.send()
   }
 
   // send signed accept message to inbox of action.actor
