@@ -60,35 +60,42 @@ app.get('/.well-known/webfinger', (req, res) => {
   res.send(resource)
 })
 
-app.get('/u/:id', (req, res) => {
-  const id = req.params.id
-  const actor = {
-    '@context': [
-      'https://www.w3.org/ns/activitystreams',
-      'https://w3id.org/security/v1'
-    ],
-    'id': `${req.publicHost}/u/${id}`,
-    'type': 'Person',
-    'preferredUsername': id,
-    'inbox': `${req.publicHost}/inbox`,
-    'followers': `${req.publicHost}/u/${id}/followers`,
-    'publicKey': {
-      'id': `${req.publicHost}/u/${id}#main-key`,
-      'owner': `${req.publicHost}/u/${id}`,
-      'publicKeyPem': PUB_KEY
-    }
+const getActor = (host, id) => ({
+  '@context': [
+    'https://www.w3.org/ns/activitystreams',
+    'https://w3id.org/security/v1'
+  ],
+  'id': `${host}/u/${id}`,
+  'type': 'Person',
+  'preferredUsername': id,
+  'inbox': `${host}/inbox`,
+  'followers': `${host}/u/${id}/followers`,
+  'publicKey': {
+    'id': `${host}/u/${id}#main-key`,
+    'owner': `${host}/u/${id}`,
+    'publicKeyPem': PUB_KEY
   }
-  res.send(actor)
 })
+
+app.get('/u/:id', (req, res) => res.send(getActor(req.publicHost, req.params.id)))
 
 const sendMessage = (from, to, message) => {
   const date = (new Date()).toUTCString()
   const { pathname, hostname } = new URL(to.inbox)
   const signer = crypto.createSign('SHA256')
-  signer.update(`(request-target): post ${pathname}\nhost: ${hostname}\ndate: ${date}`)
+  signer.update([
+    `(request-target): post ${pathname}`,
+    `host: ${hostname}`,
+    `date: ${date}`
+  ].join('\n'))
   signer.end()
   const signature = signer.sign(PRIV_KEY).toString('base64')
-  const header = `keyId="${from.id}",headers="(request-target) host date",signature="${signature}"`
+  const header = [
+    `keyId="${from.id}#main-key"`,
+    `headers="(request-target) host date"`,
+    `signature="${signature}"`
+  ].join(',')
+
   return request.post(to.inbox).send(message).set(POST_HEADERS).set({
     'Host': hostname,
     'Date': date,
