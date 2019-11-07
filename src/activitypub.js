@@ -79,6 +79,18 @@ const getActor = (host, id) => ({
 
 app.get('/u/:id', (req, res) => res.send(getActor(req.publicHost, req.params.id)))
 
+app.get('/u/:id/followers', (req, res) => {
+  const id = `${req.publicHost}/u/${req.params.id}`
+  const followers = FOLLOWERS[id] ? [...FOLLOWERS[id]] : []
+  res.send({
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    'id': `${id}/followers`,
+    'type': 'Collection',
+    'totalItems': followers.length,
+    'items': followers
+  })
+})
+
 const sendMessage = (from, to, message) => {
   const date = (new Date()).toUTCString()
   const { pathname, hostname } = new URL(to.inbox)
@@ -134,6 +146,12 @@ app.post('/inbox', async (req, res) => {
     return res.send()
   }
 
+  // add actor to followers list
+  FOLLOWERS[action.object] || (FOLLOWERS[action.object] = new Set())
+  FOLLOWERS[action.object].add(action.actor)
+
+  res.status(201).send()
+
   // send signed accept message to inbox of action.actor
   const { body: actor } = await request.get(action.actor).set(GET_HEADERS)
   const accept = {
@@ -149,10 +167,10 @@ app.post('/inbox', async (req, res) => {
     console.log('SUCCESS', resp.status)
   } catch (e) {
     console.error('ERROR', e)
+    FOLLOWERS[action.object].delete(action.actor)
     return res.status(500).send()
   }
 
-  res.status(201).send()
 })
 
 app.listen(3000, function() {
