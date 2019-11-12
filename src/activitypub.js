@@ -79,17 +79,18 @@ const getActor = (host, id) => ({
 
 app.get('/u/:id', (req, res) => res.send(getActor(req.publicHost, req.params.id)))
 
-app.get('/u/:id/followers', (req, res) => {
-  const id = `${req.publicHost}/u/${req.params.id}`
-  const followers = FOLLOWERS[id] ? [...FOLLOWERS[id]] : []
-  res.send({
+const getFollowers = (host, id) => {
+  const followers = FOLLOWERS[`${host}/u/${id}`] ? [...FOLLOWERS[`${host}/u/${id}`]] : []
+  return {
     '@context': 'https://www.w3.org/ns/activitystreams',
-    'id': `${id}/followers`,
+    'id': `${host}/u/${id}/followers`,
     'type': 'Collection',
     'totalItems': followers.length,
     'items': followers
-  })
-})
+  }
+}
+
+app.get('/u/:id/followers', (req, res) => res.send(getFollowers(req.publicHost, req.params.id)))
 
 const sendMessage = (from, to, message) => {
   const date = (new Date()).toUTCString()
