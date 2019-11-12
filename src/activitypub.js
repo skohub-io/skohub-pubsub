@@ -184,6 +184,38 @@ app.post('/inbox', async (req, res) => {
 
 })
 
+app.post('/notifications/:id', (req, res) => {
+  const followers = getFollowers(req.publicHost, req.params.id).items
+  const notification = req.body
+  followers.forEach(async followerId => {
+    const { body: follower } = await request.get(followerId).set(GET_HEADERS)
+    const actor = getActor(req.publicHost, req.params.id)
+    const create = {
+      '@context': 'https://www.w3.org/ns/activitystreams',
+      'id': `${req.publicHost}/${uuid.v4()}`,
+      'type': 'Create',
+      'actor': actor.id,
+      'to': ['https://www.w3.org/ns/activitystreams#Public'],
+      'cc': [follower.id],
+      'object': {
+        'id': `${req.publicHost}/${uuid.v4()}`,
+        'type': 'Note',
+        'name': notification.name,
+        'url': notification.id,
+        'content': notification.description,
+        'attachment': notification
+      }
+    }
+    try {
+      const resp = await sendMessage(actor, follower, create)
+      console.log('SUCCESS', resp.status)
+    } catch (e) {
+      console.error('ERROR', e)
+    }
+  })
+  res.send()
+})
+
 app.listen(3000, function() {
   console.log('Inbox listening on port 3000!')
 })
