@@ -8,14 +8,19 @@ import request from 'superagent'
 import crypto from 'crypto'
 const { URL } = require('url')
 
-const INBOX = []
-const FOLLOWERS = {}
 const POST_HEADERS = {
   'Content-Type': 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
 }
 const GET_HEADERS = {
   'Accept': 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
 }
+const FOLLOWERS = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.resolve('data', 'followers.json'), 'utf8'))
+  } catch (e) {
+    return {}
+  }
+})()
 const PRIV_KEY = fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
 const PUB_KEY = fs.readFileSync(path.resolve('data', 'public.pem'), 'utf8')
 
@@ -80,7 +85,7 @@ const getActor = (host, id) => ({
 app.get('/u/:id', (req, res) => res.send(getActor(req.publicHost, req.params.id)))
 
 const getFollowers = (host, id) => {
-  const followers = FOLLOWERS[`${host}/u/${id}`] ? [...FOLLOWERS[`${host}/u/${id}`]] : []
+  const followers = FOLLOWERS[`${host}/u/${id}`] || []
   return {
     '@context': 'https://www.w3.org/ns/activitystreams',
     'id': `${host}/u/${id}/followers`,
@@ -148,8 +153,13 @@ app.post('/inbox', async (req, res) => {
   }
 
   // add actor to followers list
-  FOLLOWERS[action.object] || (FOLLOWERS[action.object] = new Set())
-  FOLLOWERS[action.object].add(action.actor)
+  FOLLOWERS[action.object] || (FOLLOWERS[action.object] = [])
+  FOLLOWERS[action.object].includes(action.actor) || FOLLOWERS[action.object].push(action.actor)
+  fs.writeFileSync(
+    path.resolve('data', 'followers.json'),
+    JSON.stringify(FOLLOWERS, null, 2),
+    'utf8'
+  )
 
   res.status(201).send()
 
