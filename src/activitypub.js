@@ -71,7 +71,7 @@ const getActor = (host, id) => ({
     'https://w3id.org/security/v1'
   ],
   'id': `${host}/u/${id}`,
-  'type': 'Person',
+  'type': 'Service',
   'preferredUsername': id,
   'inbox': `${host}/inbox`,
   'followers': `${host}/u/${id}/followers`,
