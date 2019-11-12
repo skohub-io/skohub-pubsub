@@ -89,7 +89,9 @@ const getActor = (host, id) => ({
   }
 })
 
-app.get('/u/:id', (req, res) => res.send(getActor(req.publicHost, req.params.id)))
+app.get('/u/:id', (req, res) => res.set('content-type', 'application/activity+json')
+  // prevent express from automagically appending charset=utf-8 to the content-type
+  .send(new Buffer(JSON.stringify(getActor(req.publicHost, req.params.id)))))
 
 const getFollowers = (host, id) => {
   const followers = FOLLOWERS[`${host}/u/${id}`] || []
