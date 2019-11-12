@@ -21,6 +21,13 @@ const FOLLOWERS = (() => {
     return {}
   }
 })()
+const MESSAGES = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.resolve('data', 'messages.json'), 'utf8'))
+  } catch (e) {
+    return {}
+  }
+})()
 const PRIV_KEY = fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
 const PUB_KEY = fs.readFileSync(path.resolve('data', 'public.pem'), 'utf8')
 
@@ -97,7 +104,13 @@ const getFollowers = (host, id) => {
 
 app.get('/u/:id/followers', (req, res) => res.send(getFollowers(req.publicHost, req.params.id)))
 
-const sendMessage = (from, to, message) => {
+const getMessage = (host, id) => {
+  return MESSAGES[`${host}/m/${id}`]
+}
+
+app.get('/m/:id', (req, res) => res.send(getMessage(req.publicHost, req.params.id)))
+
+const sendMessage = async (from, to, message) => {
   const date = (new Date()).toUTCString()
   const { pathname, hostname } = new URL(to.inbox)
   const signer = crypto.createSign('SHA256')
@@ -114,11 +127,22 @@ const sendMessage = (from, to, message) => {
     `signature="${signature}"`
   ].join(',')
 
-  return request.post(to.inbox).send(message).set(POST_HEADERS).set({
+  const response = await request.post(to.inbox).send(message).set(POST_HEADERS).set({
     'Host': hostname,
     'Date': date,
     'Signature': header
   })
+  saveMessage(message)
+  return response
+}
+
+const saveMessage = message => {
+  MESSAGES[message.id] = message
+  fs.writeFileSync(
+    path.resolve('data', 'messages.json'),
+    JSON.stringify(MESSAGES, null, 2),
+    'utf8'
+  )
 }
 
 const verifyMessage = async headers => {
@@ -168,47 +192,43 @@ app.post('/inbox', async (req, res) => {
   const accept = {
     '@context': 'https://www.w3.org/ns/activitystreams',
     'actor': action.object,
-    'id': `${req.publicHost}/${uuid.v4()}`,
+    'id': `${req.publicHost}/m/${uuid.v4()}`,
     'object': action,
     'type': 'Accept'
   }
 
   try {
-    const resp = await sendMessage({id: action.object}, actor, accept)
-    console.log('SUCCESS', resp.status)
+    sendMessage({id: action.object}, actor, accept)
   } catch (e) {
     console.error('ERROR', e)
     FOLLOWERS[action.object].delete(action.actor)
-    return res.status(500).send()
   }
-
 })
 
 app.post('/notifications/:id', (req, res) => {
+  const actor = getActor(req.publicHost, req.params.id)
   const followers = getFollowers(req.publicHost, req.params.id).items
   const notification = req.body
+  const create = {
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    'id': `${req.publicHost}/m/${uuid.v4()}`,
+    'type': 'Create',
+    'actor': actor.id,
+    'to': ['https://www.w3.org/ns/activitystreams#Public'],
+    'cc': followers,
+    'object': {
+      'id': `${req.publicHost}/m/${uuid.v4()}`,
+      'type': 'Note',
+      'name': notification.name,
+      'url': notification.id,
+      'content': notification.description,
+      'attachment': notification
+    }
+  }
   followers.forEach(async followerId => {
     const { body: follower } = await request.get(followerId).set(GET_HEADERS)
-    const actor = getActor(req.publicHost, req.params.id)
-    const create = {
-      '@context': 'https://www.w3.org/ns/activitystreams',
-      'id': `${req.publicHost}/${uuid.v4()}`,
-      'type': 'Create',
-      'actor': actor.id,
-      'to': ['https://www.w3.org/ns/activitystreams#Public'],
-      'cc': [follower.id],
-      'object': {
-        'id': `${req.publicHost}/${uuid.v4()}`,
-        'type': 'Note',
-        'name': notification.name,
-        'url': notification.id,
-        'content': notification.description,
-        'attachment': notification
-      }
-    }
     try {
-      const resp = await sendMessage(actor, follower, create)
-      console.log('SUCCESS', resp.status)
+      sendMessage(actor, follower, create)
     } catch (e) {
       console.error('ERROR', e)
     }
