@@ -65,7 +65,7 @@ app.get('/.well-known/webfinger', (req, res) => {
       {
         'rel': 'self',
         'type': 'application/activity+json',
-        'href': `${req.publicHost}/u/${id}`
+        'href': `${req.publicHost}/u/${Buffer.from(id, 'hex').toString()}`
       }
     ]
   }
@@ -79,9 +79,10 @@ const getActor = (host, id) => ({
   ],
   'id': `${host}/u/${id}`,
   'type': 'Service',
-  'preferredUsername': id,
+  'name': id,
+  'preferredUsername': Buffer.from(id).toString('hex'),
   'inbox': `${host}/inbox`,
-  'followers': `${host}/u/${id}/followers`,
+  'followers': `${host}/followers?subject=${id}`,
   'publicKey': {
     'id': `${host}/u/${id}#main-key`,
     'owner': `${host}/u/${id}`,
@@ -89,7 +90,7 @@ const getActor = (host, id) => ({
   }
 })
 
-app.get('/u/:id', (req, res) => res.set('content-type', 'application/activity+json')
+app.get('/u/:id(*)', (req, res) => res.set('content-type', 'application/activity+json')
   // prevent express from automagically appending charset=utf-8 to the content-type
   .send(new Buffer(JSON.stringify(getActor(req.publicHost, req.params.id)))))
 
@@ -97,14 +98,14 @@ const getFollowers = (host, id) => {
   const followers = FOLLOWERS[`${host}/u/${id}`] || []
   return {
     '@context': 'https://www.w3.org/ns/activitystreams',
-    'id': `${host}/u/${id}/followers`,
+    'id': `${host}/followers?subject=${id}`,
     'type': 'Collection',
     'totalItems': followers.length,
     'items': followers
   }
 }
 
-app.get('/u/:id/followers', (req, res) => res.send(getFollowers(req.publicHost, req.params.id)))
+app.get('/followers', (req, res) => res.send(getFollowers(req.publicHost, req.query.subject)))
 
 const getMessage = (host, id) => {
   return MESSAGES[`${host}/m/${id}`]
@@ -207,7 +208,7 @@ app.post('/inbox', async (req, res) => {
   }
 })
 
-app.post('/notifications/:id', (req, res) => {
+app.post('/notifications/:id(*)', (req, res) => {
   const actor = getActor(req.publicHost, req.params.id)
   const followers = getFollowers(req.publicHost, req.params.id).items
   const notification = req.body
