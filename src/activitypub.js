@@ -140,7 +140,6 @@ const sendMessage = async (from, to, message) => {
     'Date': date,
     'Signature': header
   })
-  saveMessage(message)
   return response
 }
 
@@ -194,6 +193,7 @@ const handleFollowAction = async (req, res) => {
 
   try {
     sendMessage({id: action.object}, actor, accept)
+    saveMessage(accept)
   } catch (e) {
     console.error('ERROR', e)
     FOLLOWERS[action.object].delete(action.actor)
@@ -222,7 +222,6 @@ const handleNotification = (req, res) => {
   const notification = req.body
   const create = {
     '@context': 'https://www.w3.org/ns/activitystreams',
-    'id': `${req.publicHost}/m/${uuid.v4()}`,
     'type': 'Create',
     'actor': actor.id,
     'to': ['https://www.w3.org/ns/activitystreams#Public'],
@@ -240,6 +239,7 @@ const handleNotification = (req, res) => {
     const { body: follower } = await request.get(followerId).set(GET_HEADERS)
     try {
       sendMessage(actor, follower, create)
+      saveMessage(create.object)
     } catch (e) {
       console.error('ERROR', e)
     }
