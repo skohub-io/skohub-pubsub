@@ -86,7 +86,7 @@ const getActor = (host, id) => ({
   'type': 'Service',
   'name': id,
   'preferredUsername': Buffer.from(id).toString('hex'),
-  'inbox': `${host}/inbox`,
+  'inbox': `${host}/inbox?actor=${id}`,
   'followers': `${host}/followers?subject=${id}`,
   'publicKey': {
     'id': `${host}/u/${id}#main-key`,
