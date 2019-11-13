@@ -30,6 +30,11 @@ const MESSAGES = (() => {
 })()
 const PRIV_KEY = fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
 const PUB_KEY = fs.readFileSync(path.resolve('data', 'public.pem'), 'utf8')
+const ACTIVITY_TYPES = [
+  'Accept', 'Add', 'Announce', 'Arrive', 'Block', 'Create', 'Delete', 'Dislike', 'Flag', 'Follow',
+  'Ignore', 'Invite', 'Join', 'Leave', 'Like', 'Listen', 'Move', 'Offer', 'Question', 'Reject',
+  'Read', 'Remove', 'TentativeReject', 'TentativeAccept', 'Travel', 'Undo', 'Update', 'View'
+]
 
 const app = express()
 
@@ -165,19 +170,8 @@ const verifyMessage = async headers => {
   return verifier.verify(publicKey, Buffer.from(parts.signature, 'base64'))
 }
 
-app.post('/inbox', async (req, res) => {
+const handleFollowAction = async (req, res) => {
   const action = req.body
-  const verified = await verifyMessage(req.headers)
-
-  if (!verified) {
-    console.warn('Could not verify message')
-    return res.send()
-  }
-
-  if (action.type !== 'Follow') {
-    console.warn('Unhandled action type', action.type)
-    return res.send()
-  }
 
   // add actor to followers list
   FOLLOWERS[action.object] || (FOLLOWERS[action.object] = [])
@@ -187,8 +181,6 @@ app.post('/inbox', async (req, res) => {
     JSON.stringify(FOLLOWERS, null, 2),
     'utf8'
   )
-
-  res.status(201).send()
 
   // send signed accept message to inbox of action.actor
   const { body: actor } = await request.get(action.actor).set(GET_HEADERS)
@@ -206,11 +198,27 @@ app.post('/inbox', async (req, res) => {
     console.error('ERROR', e)
     FOLLOWERS[action.object].delete(action.actor)
   }
-})
+}
 
-app.post('/notifications/:id(*)', (req, res) => {
-  const actor = getActor(req.publicHost, req.params.id)
-  const followers = getFollowers(req.publicHost, req.params.id).items
+const handleAction = async (req, res) => {
+  const action = req.body
+
+  if (!(await verifyMessage(req.headers))) {
+    console.warn('Could not verify action')
+    return res.send()
+  }
+
+  if (action.type !== 'Follow') {
+    console.warn('Unhandled action type', action.type)
+    return res.send()
+  }
+
+  handleFollowAction(req, res)
+}
+
+const handleNotification = (req, res) => {
+  const actor = getActor(req.publicHost, req.query.actor)
+  const followers = getFollowers(req.publicHost, req.query.actor).items
   const notification = req.body
   const create = {
     '@context': 'https://www.w3.org/ns/activitystreams',
@@ -237,6 +245,16 @@ app.post('/notifications/:id(*)', (req, res) => {
     }
   })
   res.send()
+}
+
+app.post('/inbox', async (req, res) => {
+  const { type } = req.body
+  if (ACTIVITY_TYPES.includes(type)) {
+    handleAction(req, res)
+  } else {
+    handleNotification(req, res)
+  }
+  res.status(201).send()
 })
 
 app.listen(3000, function() {
