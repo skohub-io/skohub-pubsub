@@ -77,28 +77,6 @@ app.get('/.well-known/webfinger', (req, res) => {
   res.send(resource)
 })
 
-const getActor = (host, id) => ({
-  '@context': [
-    'https://www.w3.org/ns/activitystreams',
-    'https://w3id.org/security/v1'
-  ],
-  'id': `${host}/u/${id}`,
-  'type': 'Service',
-  'name': id,
-  'preferredUsername': Buffer.from(id).toString('hex'),
-  'inbox': `${host}/inbox?actor=${id}`,
-  'followers': `${host}/followers?subject=${id}`,
-  'publicKey': {
-    'id': `${host}/u/${id}#main-key`,
-    'owner': `${host}/u/${id}`,
-    'publicKeyPem': PUB_KEY
-  }
-})
-
-app.get('/u/:id(*)', (req, res) => res.set('content-type', 'application/activity+json')
-  // prevent express from automagically appending charset=utf-8 to the content-type
-  .send(new Buffer(JSON.stringify(getActor(req.publicHost, req.params.id)))))
-
 const getFollowers = (host, id) => {
   const followers = FOLLOWERS[`${host}/u/${id}`] || []
   return {
@@ -196,7 +174,7 @@ const handleFollowAction = async (req, res) => {
   }
 
   try {
-    sendMessage({id: action.object}, actor, accept)
+    sendMessage({ id: action.object }, actor, accept)
     saveMessage(accept)
   } catch (e) {
     console.error('ERROR', e)
@@ -221,7 +199,7 @@ const handleAction = async (req, res) => {
 }
 
 const handleNotification = (req, res) => {
-  const actor = getActor(req.publicHost, req.query.actor)
+  const actor = { id: `${req.publicHost}/${req.query.actor}` }
   const followers = getFollowers(req.publicHost, req.query.actor).items
   const notification = req.body
   const create = {
