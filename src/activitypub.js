@@ -157,11 +157,15 @@ const verifyMessage = async headers => {
     const [, key, value,] = curr.split(/^([^=]+)=(.+)$/)
     return Object.assign(acc, { [key]: value.slice(1, -1) })
   }, {})
-  const compare = parts.headers.split(' ').map(header =>
-    header === '(request-target)'
-      ? '(request-target): post /inbox'
-      : `${header}: ${headers[header]}`
-  ).join('\n')
+  const compare = parts.headers.split(' ').map(header => {
+    if (header === '(request-target)') {
+      return '(request-target): post /inbox'
+    } else if (headers['x-forwarded-host'] && header === 'host') {
+      return `host: ${headers['x-forwarded-host']}`
+    } else {
+      return `${header}: ${headers[header]}`
+    }
+  }).join('\n')
   const publicKey = (await request.get(parts.keyId).set(GET_HEADERS)).body.publicKey.publicKeyPem
   const verifier = crypto.createVerify(parts.algorithm.toUpperCase())
   verifier.update(compare)
