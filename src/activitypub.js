@@ -70,7 +70,7 @@ app.get('/.well-known/webfinger', (req, res) => {
       {
         'rel': 'self',
         'type': 'application/activity+json',
-        'href': `${req.publicHost}/u/${Buffer.from(id, 'hex').toString()}`
+        'href': `${req.publicHost}/${Buffer.from(id, 'hex').toString()}`
       }
     ]
   }
