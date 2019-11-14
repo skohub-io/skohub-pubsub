@@ -78,7 +78,7 @@ app.get('/.well-known/webfinger', (req, res) => {
 })
 
 const getFollowers = (host, id) => {
-  const followers = FOLLOWERS[`${host}/u/${id}`] || []
+  const followers = FOLLOWERS[`${host}/${id}`] || []
   return {
     '@context': 'https://www.w3.org/ns/activitystreams',
     'id': `${host}/followers?subject=${id}`,
