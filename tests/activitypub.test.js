@@ -1,12 +1,6 @@
 import request from 'supertest'
 import nock from 'nock'
 import data from './data.json'
-
-nock('https://openbiblio.social:443')
-  .get('/users/literarymachine')
-  .reply(...data.get['/users/literarymachine'].reply)
-  .persist()
-
 import activitypub from '../src/activitypub'
 
 let server
@@ -34,8 +28,14 @@ describe('Webfinger', () => {
 })
 
 describe('ActivityPub', () => {
+  const timeout = async ms => new Promise(resolve => setTimeout(resolve, ms))
+  nock('https://openbiblio.social:443')
+    .get('/users/literarymachine')
+    .reply(...data.get['/users/literarymachine'].reply)
+    .persist()
+
   test('accepts valid follow requests', async (done) => {
-    const scope = nock('https://openbiblio.social:443')
+    const acceptScope = nock('https://openbiblio.social:443')
       .post('/users/literarymachine/inbox')
       .reply(201)
 
@@ -43,8 +43,8 @@ describe('ActivityPub', () => {
       .set(data.post['/inbox'].headers)
       .send(data.post['/inbox'].message)
 
-    setTimeout(() => {
-      scope.isDone() && done()
-    }, 10)
+    // confirm ACCEPT message confirming FOLLOW activity has been received
+    await timeout(10)
+    acceptScope.isDone() && done()
   })
 })
