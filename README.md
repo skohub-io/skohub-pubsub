@@ -1,6 +1,7 @@
 # skohub-pubsub
 
-This part provides the [SkoHub](http://skohub.io) core infrastructure, setting up basic inboxes for subjects plus the ability of subscribing to push notifications for those inboxes.
+This part provides the [SkoHub](http://skohub.io) core infrastructure, setting up basic inboxes for
+subjects plus the ability of subscribing to push notifications for those inboxes.
 
 Basic setup:
 
@@ -8,23 +9,16 @@ Basic setup:
     $ cd skohub-pubsub
     $ npm install
     $ npm test
-    $ npm start
+    $ PORT=3000 npm start
 
-Start the publisher, take a note of the `$address` and `$port` to provide a valid
-topic URL in the next step below:
+This will start the ActivityPub server on the specified `PORT`. It accepts
+[`FOLLOW`](https://www.w3.org/TR/activitypub/#follow-activity-inbox) messages sent to the `/inbox`.
+All other [activity types](https://www.w3.org/TR/activitystreams-vocabulary/#activity-types) are
+currently ignored.
 
-    $ node src/publisher.js http://localhost:3000/hub http://localhost:3000/inbox
+Non-activity objects sent to `/inbox?actor=username/repo/some/classification/path`[^1] are
+distributed as `NOTE` objects to the corresponding followers. The original notifications are
+delivered as an [attachment](https://www.w3.org/TR/activitystreams-vocabulary/#dfn-attachment) of
+the note.
 
-Start the subscriber, subscribing to a publisher topic URL (the $address and $port from
-above) and a random path:
-
-    $ node src/subscriber.js http://localhost:3000/hub http://$address:$port/some/random/path
-
-Send a notification to the hub and see it logged by the subscriber:
-
-    $ curl "localhost:3000/inbox?target=http://$address:$port/some/random/path" \
-    -H "Content-Type: application/ld+json" \
-    -d '{"foo": "bar"}'
-
-Also, try to notify the hub with a slightly different topic (e.g.
-http://$address:$port/another/random/path) - see the subscriber logging nothing.
+[^1]: Actor names are considered relative to the hostname of the server.
