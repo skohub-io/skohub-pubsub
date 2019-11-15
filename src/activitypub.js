@@ -28,7 +28,15 @@ const MESSAGES = (() => {
     return {}
   }
 })()
-const PRIV_KEY = fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
+
+const PRIV_KEY = (() => {
+  try {
+    fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
+  } catch (e) {
+    return crypto.generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey
+  }
+})()
+
 const ACTIVITY_TYPES = [
   'Accept', 'Add', 'Announce', 'Arrive', 'Block', 'Create', 'Delete', 'Dislike', 'Flag', 'Follow',
   'Ignore', 'Invite', 'Join', 'Leave', 'Like', 'Listen', 'Move', 'Offer', 'Question', 'Reject',
