@@ -29,7 +29,6 @@ const MESSAGES = (() => {
   }
 })()
 const PRIV_KEY = fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
-const PUB_KEY = fs.readFileSync(path.resolve('data', 'public.pem'), 'utf8')
 const ACTIVITY_TYPES = [
   'Accept', 'Add', 'Announce', 'Arrive', 'Block', 'Create', 'Delete', 'Dislike', 'Flag', 'Follow',
   'Ignore', 'Invite', 'Join', 'Leave', 'Like', 'Listen', 'Move', 'Offer', 'Question', 'Reject',
@@ -63,7 +62,7 @@ app.use((req, res, next) => {
 
 app.get('/.well-known/webfinger', (req, res) => {
   const subject = req.query.resource
-  const [,id,] = subject.split(/[:@]/)
+  const [, id] = subject.split(/[:@]/)
   const resource = {
     'subject': subject,
     'links': [
@@ -132,7 +131,7 @@ const saveMessage = message => {
 
 const verifyMessage = async headers => {
   const parts = headers['signature'].split(',').reduce((acc, curr) => {
-    const [, key, value,] = curr.split(/^([^=]+)=(.+)$/)
+    const [, key, value] = curr.split(/^([^=]+)=(.+)$/)
     return Object.assign(acc, { [key]: value.slice(1, -1) })
   }, {})
   const compare = parts.headers.split(' ').map(header => {
