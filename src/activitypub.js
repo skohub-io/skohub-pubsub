@@ -35,11 +35,11 @@ const ACTIVITY_TYPES = [
   'Read', 'Remove', 'TentativeReject', 'TentativeAccept', 'Travel', 'Undo', 'Update', 'View'
 ]
 
-const app = express()
+const activitypub = express()
 
-app.use(morgan('dev'))
+activitypub.use(morgan('dev'))
 
-app.use(express.json({
+activitypub.use(express.json({
   type: [
     'application/json',
     'application/ld+json',
@@ -47,12 +47,12 @@ app.use(express.json({
   ]
 }))
 
-app.use((req, res, next) => {
+activitypub.use((req, res, next) => {
   console.log(req.body)
   next()
 })
 
-app.use((req, res, next) => {
+activitypub.use((req, res, next) => {
   req.publicHost = url.format({
     protocol: req.get('x-forwarded-proto') || req.protocol,
     host: req.get('x-forwarded-host') || req.get('host')
@@ -60,7 +60,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get('/.well-known/webfinger', (req, res) => {
+activitypub.get('/.well-known/webfinger', (req, res) => {
   const subject = req.query.resource
   const [, id] = subject.split(/[:@]/)
   const resource = {
@@ -87,13 +87,13 @@ const getFollowers = (host, id) => {
   }
 }
 
-app.get('/followers', (req, res) => res.send(getFollowers(req.publicHost, req.query.subject)))
+activitypub.get('/followers', (req, res) => res.send(getFollowers(req.publicHost, req.query.subject)))
 
 const getMessage = (host, id) => {
   return MESSAGES[`${host}/m/${id}`]
 }
 
-app.get('/m/:id', (req, res) => res.send(getMessage(req.publicHost, req.params.id)))
+activitypub.get('/m/:id', (req, res) => res.send(getMessage(req.publicHost, req.params.id)))
 
 const sendMessage = async (from, to, message) => {
   const date = (new Date()).toUTCString()
@@ -228,7 +228,7 @@ const handleNotification = (req, res) => {
   res.send()
 }
 
-app.post('/inbox', async (req, res) => {
+activitypub.post('/inbox', async (req, res) => {
   const { type } = req.body
   if (ACTIVITY_TYPES.includes(type)) {
     handleAction(req, res)
@@ -238,6 +238,4 @@ app.post('/inbox', async (req, res) => {
   res.status(201).send()
 })
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Inbox listening on port ${process.env.PORT || 3000}!`)
-})
+export default activitypub

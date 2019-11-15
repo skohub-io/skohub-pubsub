@@ -1,10 +1,5 @@
-import pubsub from './pubsub'
+import activitypub from './activitypub'
 
-const app = pubsub()
-const server = app.listen(3000, () => {
-  console.log('Publish-subscribe server listening on port 3000!')
+activitypub.listen(process.env.PORT || 3000, () => {
+  console.log(`Inbox listening on port ${process.env.PORT || 3000}!`)
 })
-
-server.on('upgrade', (req, socket, head) => app.wss.handleUpgrade(
-  req, socket, head, ws => app.wss.emit('connection', ws, req)
-))

@@ -1,2 +1,2 @@
 require('@babel/register')
-require('./src/activitypub.js')
+require('./src/server.js')
