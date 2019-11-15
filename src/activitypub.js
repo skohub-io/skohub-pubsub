@@ -31,7 +31,7 @@ const MESSAGES = (() => {
 
 const PRIV_KEY = (() => {
   try {
-    fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
+    return fs.readFileSync(path.resolve('data', 'private.pem'), 'utf8')
   } catch (e) {
     return crypto.generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey
   }
