@@ -1,0 +1,33 @@
+{
+  "get": {
+    "/users/literarymachine": {
+      "reply": [200,["1f8b080072aace5d00039c555b77a23a14fe2bb398c73ac57bd5a7c60b16500b6abd8de721421034249424a076f5bf4ff032adc775e6aca92f645fbe9d6f675f7c531e1d4a38da71a5f153f1398f584355d334bd4f4bf7345eab84a9d0e14112f03de331822153721f7ea5c03d7a31e48858baa84941c9bd2921240262bc075114d304318d624c531433a5a140d6f86f734ee1944a2ac71be4051b1a9010324e5d4ace74be4b270f412e62e42a8d37e531909f23acf15b9d531ef93e42529f59df730ac48c9a84a604b00f8c64f2597f030a2537774caf0017dd8d33737c14c20fe62739e39c11b6621aa198ef27108b0c74b236aed53925b9362767b5ee22c2e5eb4a77ea5d92bd56e61437608e2417c31546179f2bddfb3f39e598c6a57af26eb20a5638a0f78c3a01c4aa60b2082a0eb884c4fb103a7e403202e7542d69a5247bff63c102b2fefb68ea07f612e7d4175f8b736a9a80ace8ee0b314eb89c4205ff5a8033f07347fe750c472682e48851396a9f3a388a918762797e912802c3ac00b795391be48989309426292c453e5f72a2e3079d04f52c493f11e33f927cbcbde40fe3ecc90942ff6e3e223096090819d631d13e1ba0af34def71006e4c7560690154a098abfd4bbbf69582894017e64bf66a7ab0fbe592fcd9edefa6676e647e592f475bda96fc0a0b9debefadba05b4ff34d607734009e5bc0ae81ccde5a9bf2dc01c968b199b54a5341d37279651506435e58929950c51e82307add4c761e2bb0bb7a4bc7156fb2aba3566dfe34cdeff3e19eb6dae5b45b0eb56a15577cedf09cced55afe804a8b25f1c1ceb883cecc686b35fc02b7a4ea0851a679f26c26437d81eb8bcea457adf9c11a886167564cba6e4ad5a23dac3cb138a86e97c4ac8daa6a189562a76b4d597ff40ae2a2339c962b047bb671673cf4674db6d8beded5899899ad43bea7962650e87632020ef1651656ad959febd1c1538b64344880f7205f1357c6fdc922e5883e98781a4f4b8631de19637d3bee68aea1591698dbc5e9ba4c427d49b4e6bc7d309379cf707a9542c5e1f3fa460b4513d98769df2f2695cdd36cb66a577177e33f60d788ebd442be5d4d3c60726d2796646aeb6d6083e6921c8bd319b46feb95ed5d0ee512fa29571be45cb20ce5523cc988b891fcf7e0c785cf7c282749ffdf35715a08efefbf000000ffff03000a1b053d17070000"],["Date","Fri, 15 Nov 2019 13:38:58 GMT","Content-Type","application/activity+json; charset=utf-8","Transfer-Encoding","chunked","Connection","close","Server","Mastodon","X-Frame-Options","DENY","X-Content-Type-Options","nosniff","X-XSS-Protection","1; mode=block","Vary","Accept, Accept-Encoding, Origin","Cache-Control","max-age=180, public","Content-Encoding","gzip","ETag","W/\"bead24fded8dac9423772decc18e3303\"","Set-Cookie","_mastodon_session=VM9mmkSvMpdPcIFVNsKOLS4IVP3SS7BL3KEf4cH1o2hADJ8Wy9FXQ8pQxuZ8nuqPd7ZNEVJ8a%2FlgrVOBHDLO--89WW1JfwI2DOVB6D--1Bw5%2FBET4owM2OpkhM65jw%3D%3D; path=/; secure; HttpOnly","X-Request-Id","191493d3-fe3a-413d-a823-1138c384dc9c","X-Runtime","0.019833"]]
+    }
+  },
+  "post": {
+    "/inbox": {
+      "headers": {
+        "host": "localhost:3001",
+        "user-agent": "http.rb/3.3.0 (Mastodon/3.0.1; +https://openbiblio.social/)",
+        "date": "Fri, 15 Nov 2019 11:28:48 GMT",
+        "accept-encoding": "gzip",
+        "digest": "SHA-256=G5dlKO1mapLz4t8oq6tGBrXTIdaoN4fxklbDsPDURs0=",
+        "content-type": "application/activity+json",
+        "signature": "keyId=\"https://openbiblio.social/users/literarymachine#main-key\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date digest content-type\",signature=\"l5afVIKkHqh8Uj2pO/X3KVq8c3uwIA2J2ATEX7Dq+pAagwy43SNn205jXWk2FAg6sV5Xzpbre2YcuEd0UpfUJUrFR+u9i+YpCaK6hgLZJ6x+QW4v63mp91sHpv698hnHzJ3DuXN8pqqeGR/HFNh3CG1mZxwOYNf/EBJbQ79eUfa80RvBvnP5kMAki+Rd/FkjOFzuem2Yb09Wz66tUU75ecjoan405R1Bi8e7j5UwWku4vHI1hGWbLxgI0TlgHGs/fQQ3txYXeKVqqD4zFH6Ij7zau0cNLdt+gtsn0hi78d9/Y1TMZI+fhhegDFUqgPgkmfCX5jXSAeCTgkimi/LEaQ==\"",
+        "x-forwarded-proto": "https",
+        "x-forwarded-for": "85.235.65.140",
+        "x-forwarded-host": "test.skohub.io",
+        "x-forwarded-server": "test.skohub.io",
+        "connection": "close",
+        "content-length": "287"
+      },
+      "message": {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "id": "https://openbiblio.social/46279d5a-656a-4b29-bdfd-ee280e83f0e0",
+        "type": "Follow",
+        "actor": "https://openbiblio.social/users/literarymachine",
+        "object": "https://test.skohub.io/literarymachine/skos/w3id.org/class/hochschulfaecher/B56"
+      }
+    }
+  }
+}
