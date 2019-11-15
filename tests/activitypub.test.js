@@ -8,8 +8,8 @@ beforeEach(done => (server = activitypub.listen(0, '127.0.0.1', () => done())))
 afterEach(done => server.close(done))
 
 describe('Webfinger', () => {
-  const path = 'literarymachine/skos/w3id.org/class/hochschulfaecher/B399'
-  const wfuser = Buffer.from(path).toString('hex')
+  const actor = 'literarymachine/skos/w3id.org/class/hochschulfaecher/B56'
+  const wfuser = Buffer.from(actor).toString('hex')
 
   test('returns correct link for valid webfinger user', async () => {
     const { address, port } = server.address()
@@ -21,7 +21,7 @@ describe('Webfinger', () => {
       links: [{
         rel: 'self',
         type: 'application/activity+json',
-        href: `http://${address}:${port}/${path}`
+        href: `http://${address}:${port}/${actor}`
       }]
     })
   })
@@ -45,6 +45,42 @@ describe('ActivityPub', () => {
 
     // confirm ACCEPT message confirming FOLLOW activity has been received
     await timeout(10)
-    acceptScope.isDone() && done()
+    acceptScope.done()
+    done()
+  })
+
+  test('distributes notifications to followers', async (done) => {
+    const actor = 'literarymachine/skos/w3id.org/class/hochschulfaecher/B56'
+    const acceptScope = nock('https://openbiblio.social:443')
+      .post('/users/literarymachine/inbox')
+      .reply(201)
+
+    await request.agent(server).post('/inbox')
+      .set(data.post['/inbox'].headers)
+      .send(data.post['/inbox'].message)
+
+    await timeout(10)
+    acceptScope.done()
+
+    const noteScope = nock('https://openbiblio.social:443')
+      .post('/users/literarymachine/inbox')
+      .reply(201)
+    await request.agent(server).post('/inbox')
+      .query({ actor })
+      .set({
+        'Content-type': 'application/json',
+        'x-forwarded-host': 'test.skohub.io',
+        'x-forwarded-proto': 'https'
+      })
+      .send({
+        name: 'Hello, world',
+        id: 'http://example.org',
+        'description': 'Lorem ipsum dolor sit amet'
+      })
+
+    // confirm NOTE message has been received in inbox
+    await timeout(10)
+    noteScope.done()
+    done()
   })
 })
