@@ -83,4 +83,46 @@ describe('ActivityPub', () => {
     noteScope.done()
     done()
   })
+
+  test('unverified actions are rejected', async() => {
+    const response = await request.agent(server).post('/inbox')
+      .set(Object.assign({}, data.post['/inbox'].headers, {
+        signature: "keyId=\"https://openbiblio.social/users/literarymachine#main-key\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date digest content-type\",signature=\"foobar\""
+      }))
+      .send(data.post['/inbox'].message)
+    expect(response.status).toBe(400)
+  })
+
+  test('unsupported actions are rejected', async() => {
+    const response = await request.agent(server).post('/inbox')
+      .set(data.post['/inbox'].headers)
+      .send(Object.assign({}, data.post['/inbox'].message, { type: 'Add' }))
+    expect(response.status).toBe(400)
+  })
+
+  test('new followers are added to followers list', async () => {
+    const actor = 'literarymachine/skos/w3id.org/class/hochschulfaecher/B56'
+    const acceptScope = nock('https://openbiblio.social:443')
+      .post('/users/literarymachine/inbox')
+      .reply(201)
+
+    await request.agent(server).post('/inbox')
+      .set(data.post['/inbox'].headers)
+      .send(data.post['/inbox'].message)
+
+    await timeout(10)
+    acceptScope.done()
+
+    const response = await request.agent(server).get('/followers')
+      .set({
+        'Content-type': 'application/json',
+        'x-forwarded-host': 'test.skohub.io',
+        'x-forwarded-proto': 'https'
+      })
+      .query({ subject: actor })
+
+    expect(response.body.items).toEqual([
+      'https://openbiblio.social/users/literarymachine'
+    ])
+  })
 })

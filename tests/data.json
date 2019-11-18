@@ -15,11 +15,8 @@
         "content-type": "application/activity+json",
         "signature": "keyId=\"https://openbiblio.social/users/literarymachine#main-key\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date digest content-type\",signature=\"l5afVIKkHqh8Uj2pO/X3KVq8c3uwIA2J2ATEX7Dq+pAagwy43SNn205jXWk2FAg6sV5Xzpbre2YcuEd0UpfUJUrFR+u9i+YpCaK6hgLZJ6x+QW4v63mp91sHpv698hnHzJ3DuXN8pqqeGR/HFNh3CG1mZxwOYNf/EBJbQ79eUfa80RvBvnP5kMAki+Rd/FkjOFzuem2Yb09Wz66tUU75ecjoan405R1Bi8e7j5UwWku4vHI1hGWbLxgI0TlgHGs/fQQ3txYXeKVqqD4zFH6Ij7zau0cNLdt+gtsn0hi78d9/Y1TMZI+fhhegDFUqgPgkmfCX5jXSAeCTgkimi/LEaQ==\"",
         "x-forwarded-proto": "https",
-        "x-forwarded-for": "85.235.65.140",
         "x-forwarded-host": "test.skohub.io",
-        "x-forwarded-server": "test.skohub.io",
-        "connection": "close",
-        "content-length": "287"
+        "x-forwarded-server": "test.skohub.io"
       },
       "message": {
         "@context": "https://www.w3.org/ns/activitystreams",

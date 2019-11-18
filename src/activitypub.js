@@ -194,15 +194,16 @@ const handleAction = async (req, res) => {
 
   if (!(await verifyMessage(req.headers))) {
     console.warn('Could not verify action')
-    return res.send()
+    return res.status(400).send()
   }
 
   if (action.type !== 'Follow') {
     console.warn('Unhandled action type', action.type)
-    return res.send()
+    return res.status(400).send()
   }
 
   handleFollowAction(req, res)
+  res.status(201).send()
 }
 
 const handleNotification = (req, res) => {
@@ -233,17 +234,16 @@ const handleNotification = (req, res) => {
       console.error('ERROR', e)
     }
   })
-  res.send()
+  res.status(201).send()
 }
 
-activitypub.post('/inbox', async (req, res) => {
+activitypub.post('/inbox', (req, res) => {
   const { type } = req.body
   if (ACTIVITY_TYPES.includes(type)) {
     handleAction(req, res)
   } else {
     handleNotification(req, res)
   }
-  res.status(201).send()
 })
 
 export default activitypub
