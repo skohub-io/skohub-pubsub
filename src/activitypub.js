@@ -6,6 +6,7 @@ import url from 'url'
 import morgan from 'morgan'
 import request from 'superagent'
 import crypto from 'crypto'
+import cors from 'cors'
 const { URL } = require('url')
 
 const POST_HEADERS = {
@@ -47,6 +48,8 @@ const activitypub = express()
 
 activitypub.use(morgan('dev'))
 
+activitypub.use(cors())
+
 activitypub.use(express.json({
   type: [
     'application/json',
@@ -56,6 +59,7 @@ activitypub.use(express.json({
 }))
 
 activitypub.use((req, res, next) => {
+  console.log(req.headers)
   console.log(req.body)
   next()
 })
