@@ -125,4 +125,37 @@ describe('ActivityPub', () => {
       'https://openbiblio.social/users/literarymachine'
     ])
   })
+
+  test('undone followers are removed from followers list', async () => {
+    const actor = 'literarymachine/skos/w3id.org/class/hochschulfaecher/B56'
+    const acceptScope = nock('https://openbiblio.social:443')
+      .post('/users/literarymachine/inbox')
+      .reply(201)
+
+    await request.agent(server).post('/inbox')
+      .set(data.post['/inbox'].headers)
+      .send(data.post['/inbox'].message)
+
+    await timeout(10)
+    acceptScope.done()
+
+    await request.agent(server).post('/inbox')
+      .set(data.post['/inbox'].headers)
+      .send({
+        type: 'Undo',
+        object: data.post['/inbox'].message
+      })
+
+    const response = await request.agent(server).get('/followers')
+      .set({
+        'Content-type': 'application/json',
+        'x-forwarded-host': 'test.skohub.io',
+        'x-forwarded-proto': 'https'
+      })
+      .query({ subject: actor })
+
+    expect(response.body.items).toEqual([
+
+    ])
+  })
 })

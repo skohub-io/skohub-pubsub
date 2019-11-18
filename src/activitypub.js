@@ -189,6 +189,25 @@ const handleFollowAction = async (req, res) => {
   }
 }
 
+const handleUndoAction = (req, res) => {
+  const undoneAction = req.body.object
+
+  if (undoneAction.type !== 'Follow') {
+    console.warn('Unhandled undo action type', action.type)
+    return res.status(400).send()
+  }
+
+  if (FOLLOWERS[undoneAction.object]) {
+    FOLLOWERS[undoneAction.object] = FOLLOWERS[undoneAction.object]
+      .filter(follower => follower !== undoneAction.actor)
+    fs.writeFileSync(
+      path.resolve('data', 'followers.json'),
+      JSON.stringify(FOLLOWERS, null, 2),
+      'utf8'
+    )
+  }
+}
+
 const handleAction = async (req, res) => {
   const action = req.body
 
@@ -197,12 +216,18 @@ const handleAction = async (req, res) => {
     return res.status(400).send()
   }
 
-  if (action.type !== 'Follow') {
-    console.warn('Unhandled action type', action.type)
-    return res.status(400).send()
+  switch (action.type) {
+    case 'Follow':
+      handleFollowAction(req, res)
+      break
+    case 'Undo':
+      handleUndoAction(req, res)
+      break
+    default:
+      console.warn('Unhandled action type', action.type)
+      return res.status(400).send()
   }
 
-  handleFollowAction(req, res)
   res.status(201).send()
 }
 
