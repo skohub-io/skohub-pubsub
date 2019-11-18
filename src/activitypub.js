@@ -241,6 +241,7 @@ const handleNotification = (req, res) => {
   const notification = req.body
   const create = {
     '@context': 'https://www.w3.org/ns/activitystreams',
+    'id': `${req.publicHost}/m/${uuid.v4()}`,
     'type': 'Create',
     'actor': actor.id,
     'to': ['https://www.w3.org/ns/activitystreams#Public'],
@@ -259,6 +260,7 @@ const handleNotification = (req, res) => {
     try {
       sendMessage(actor, follower, create)
       saveMessage(create.object)
+      saveMessage(create)
     } catch (e) {
       console.error('ERROR', e)
     }
@@ -273,6 +275,21 @@ activitypub.post('/inbox', (req, res) => {
   } else {
     handleNotification(req, res)
   }
+})
+
+activitypub.get('/inbox', (req, res) => {
+  const { actor } = req.query
+  const id = `${req.publicHost}/${req.query.actor}`
+  const messages = Object.values(MESSAGES)
+    .filter(message => message.type === 'Create' && message.actor === id)
+    .map(message => message.object)
+  res.send({
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    'id': `${req.publicHost}/inbox?actor=${actor}`,
+    'type': 'Collection',
+    'totalItems': messages.length,
+    'items': messages
+  })
 })
 
 export default activitypub
