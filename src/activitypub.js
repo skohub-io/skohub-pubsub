@@ -255,17 +255,17 @@ const handleNotification = (req, res) => {
       'attachment': notification
     }
   }
+  saveMessage(create.object)
+  saveMessage(create)
   followers.forEach(async followerId => {
     const { body: follower } = await request.get(followerId).set(GET_HEADERS)
     try {
       sendMessage(actor, follower, create)
-      saveMessage(create.object)
-      saveMessage(create)
     } catch (e) {
       console.error('ERROR', e)
     }
   })
-  res.status(201).send()
+  res.status(201).location(create.object.id).send()
 }
 
 activitypub.post('/inbox', (req, res) => {
