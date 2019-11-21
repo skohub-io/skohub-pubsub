@@ -84,6 +84,32 @@ describe('ActivityPub', () => {
     done()
   })
 
+  test('persists notifications', async () => {
+    const actor = 'literarymachine/skos/w3id.org/class/hochschulfaecher/B56'
+    nock('https://openbiblio.social:443')
+      .post('/users/literarymachine/inbox')
+      .reply(201)
+    await request.agent(server).post('/inbox')
+      .query({ actor })
+      .set({
+        'Content-type': 'application/json',
+        'x-forwarded-host': 'test.skohub.io',
+        'x-forwarded-proto': 'https'
+      })
+      .send({
+        name: 'Hello, world',
+        id: 'http://example.org',
+        'description': 'Lorem ipsum dolor sit amet'
+      })
+    const response = await request.agent(server).get('/inbox')
+      .query({ actor })
+      .set({
+        'x-forwarded-host': 'test.skohub.io',
+        'x-forwarded-proto': 'https'
+      })
+    console.log("BODY", response.body)
+  })
+
   test('unverified actions are rejected', async() => {
     const response = await request.agent(server).post('/inbox')
       .set(Object.assign({}, data.post['/inbox'].headers, {
@@ -154,8 +180,6 @@ describe('ActivityPub', () => {
       })
       .query({ subject: actor })
 
-    expect(response.body.items).toEqual([
-
-    ])
+    expect(response.body.items).toEqual([])
   })
 })
