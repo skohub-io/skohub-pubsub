@@ -251,7 +251,7 @@ const handleNotification = (req, res) => {
       'type': 'Note',
       'name': notification.name,
       'url': notification.id,
-      'content': notification.description,
+      'content': `<p>${notification.name}: <a href="${notification.id}" rel="nofollow noopener" target="_blank">${notification.id}</a></p>`,
       'attachment': notification
     }
   }
