@@ -197,7 +197,7 @@ const handleUndoAction = (req, res) => {
   const undoneAction = req.body.object
 
   if (undoneAction.type !== 'Follow') {
-    console.warn('Unhandled undo action type', action.type)
+    console.warn('Unhandled undo action type', undoneAction.type)
     return res.status(400).send()
   }
 
