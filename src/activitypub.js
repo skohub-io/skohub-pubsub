@@ -279,11 +279,11 @@ activitypub.post('/inbox', (req, res) => {
 
 activitypub.get('/inbox', (req, res) => {
   const { actor } = req.query
-  const id = `${req.publicHost}/${req.query.actor}`
+  const id = `${req.publicHost}/${actor}`
   const messages = Object.values(MESSAGES)
     .filter(message => message.type === 'Create' && message.actor === id)
     .map(message => message.object)
-  res.send({
+  res.set('content-type', 'application/ld+json').send({
     '@context': 'https://www.w3.org/ns/activitystreams',
     'id': `${req.publicHost}/inbox?actor=${actor}`,
     'type': 'Collection',
