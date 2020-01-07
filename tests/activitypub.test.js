@@ -2,9 +2,10 @@ import request from 'supertest'
 import nock from 'nock'
 import data from './data.json'
 import activitypub from '../src/activitypub'
+import filesystem from '../src/filesystem'
 
 let server
-beforeEach(done => (server = activitypub.listen(0, '127.0.0.1', () => done())))
+beforeEach(done => (server = activitypub(filesystem('data')).listen(0, '127.0.0.1', () => done())))
 afterEach(done => server.close(done))
 
 describe('Webfinger', () => {
