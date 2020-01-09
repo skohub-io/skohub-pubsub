@@ -2,10 +2,16 @@ import request from 'supertest'
 import nock from 'nock'
 import data from './data.json'
 import activitypub from '../src/activitypub'
+// import mongodb from '../src/mongodb'
 import inmemory from '../src/inmemory'
 
 let server
 beforeEach(done => (server = activitypub(inmemory).listen(0, '127.0.0.1', () => done())))
+// beforeEach(done => {
+//   mongodb({ host: 'localhost', port: 27017, db: 'skohub-test' }).then(db => {
+//     server = activitypub(db).listen(0, '127.0.0.1', done)
+//   })
+// })
 afterEach(done => server.close(done))
 
 describe('Webfinger', () => {
@@ -108,7 +114,6 @@ describe('ActivityPub', () => {
         'x-forwarded-host': 'test.skohub.io',
         'x-forwarded-proto': 'https'
       })
-    console.log("BODY", response.body)
   })
 
   test('unverified actions are rejected', async() => {

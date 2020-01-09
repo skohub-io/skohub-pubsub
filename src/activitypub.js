@@ -74,8 +74,8 @@ const activitypub = db => {
     res.send(resource)
   })
 
-  app.get('/followers', (req, res) => {
-    const followers = db.getFollowers(`${req.publicHost}/${req.query.subject}`)
+  app.get('/followers', async (req, res) => {
+    const followers = await db.getFollowers(`${req.publicHost}/${req.query.subject}`)
     res.send({
       '@context': 'https://www.w3.org/ns/activitystreams',
       'id': `${req.publicHost}/followers?subject=${req.query.subject}`,
@@ -85,7 +85,7 @@ const activitypub = db => {
     })
   })
 
-  app.get('/m/:id', (req, res) => res.send(db.getMessage(`${req.publicHost}/m/${req.params.id}`)))
+  app.get('/m/:id', async (req, res) => res.send(await db.getMessage(`${req.publicHost}/m/${req.params.id}`)))
 
   const sendMessage = async (from, to, message) => {
     const date = (new Date()).toUTCString()
@@ -137,7 +137,7 @@ const activitypub = db => {
     const action = req.body
 
     // add actor to followers list
-    db.addFollower(action.object, action.actor)
+    await db.addFollower(action.object, action.actor)
 
     // send signed accept message to inbox of action.actor
     const { body: actor } = await request.get(action.actor).set(GET_HEADERS)
@@ -151,14 +151,14 @@ const activitypub = db => {
 
     try {
       sendMessage({ id: action.object }, actor, accept)
-      db.saveMessage(accept)
+      await db.saveMessage(accept)
     } catch (e) {
       console.error('ERROR', e)
-      db.removeFollower(action.object, action.actor)
+      await db.removeFollower(action.object, action.actor)
     }
   }
 
-  const handleUndoAction = (req, res) => {
+  const handleUndoAction = async (req, res) => {
     const undoneAction = req.body.object
 
     if (undoneAction.type !== 'Follow') {
@@ -166,9 +166,7 @@ const activitypub = db => {
       return res.status(400).send()
     }
 
-    if (db.getFollowers(undoneAction.object)) {
-      db.removeFollower(undoneAction.object, undoneAction.actor)
-    }
+    await db.removeFollower(undoneAction.object, undoneAction.actor)
   }
 
   const handleAction = async (req, res) => {
@@ -184,7 +182,7 @@ const activitypub = db => {
         handleFollowAction(req, res)
         break
       case 'Undo':
-        handleUndoAction(req, res)
+        await handleUndoAction(req, res)
         break
       default:
         console.warn('Unhandled action type', action.type)
@@ -194,9 +192,9 @@ const activitypub = db => {
     res.status(201).send()
   }
 
-  const handleNotification = (req, res) => {
+  const handleNotification = async (req, res) => {
     const actor = { id: `${req.publicHost}/${req.query.actor}` }
-    const followers = db.getFollowers(actor.id)
+    const followers = await db.getFollowers(actor.id)
     const notification = req.body
     const create = {
       '@context': 'https://www.w3.org/ns/activitystreams',
@@ -214,8 +212,8 @@ const activitypub = db => {
         'attachment': notification
       }
     }
-    db.saveMessage(create.object)
-    db.saveMessage(create)
+    await db.saveMessage(create.object)
+    await db.saveMessage(create)
     followers.forEach(async followerId => {
       const { body: follower } = await request.get(followerId).set(GET_HEADERS)
       try {
@@ -236,9 +234,9 @@ const activitypub = db => {
     }
   })
 
-  app.get('/inbox', (req, res) => {
+  app.get('/inbox', async (req, res) => {
     const { actor } = req.query
-    const messages = db.getMessagesFor(`${req.publicHost}/${actor}`)
+    const messages = await db.getMessagesFor(`${req.publicHost}/${actor}`)
     res.set('content-type', 'application/ld+json').send({
       '@context': 'https://www.w3.org/ns/activitystreams',
       'id': `${req.publicHost}/inbox?actor=${actor}`,
