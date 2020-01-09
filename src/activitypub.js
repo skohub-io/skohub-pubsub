@@ -32,7 +32,7 @@ const activitypub = db => {
 
   const app = express()
 
-  app.use(morgan('dev'))
+  process.env.DEBUG && app.use(morgan('dev'))
 
   app.use(cors())
 
@@ -44,7 +44,7 @@ const activitypub = db => {
     ]
   }))
 
-  app.use((req, res, next) => {
+  process.env.DEBUG && app.use((req, res, next) => {
     console.log(req.headers)
     console.log(req.body)
     next()
