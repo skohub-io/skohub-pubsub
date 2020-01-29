@@ -3,15 +3,32 @@ import nock from 'nock'
 import data from './data.json'
 import activitypub from '../src/activitypub'
 // import mongodb from '../src/mongodb'
+// import indexingdb from '../src/indexingdb'
 import inmemory from '../src/inmemory'
 
 let server
 beforeEach(done => (server = activitypub(inmemory).listen(0, '127.0.0.1', () => done())))
+
+// mongodb
 // beforeEach(done => {
 //   mongodb({ host: 'localhost', port: 27017, db: 'skohub-test' }).then(db => {
 //     server = activitypub(db).listen(0, '127.0.0.1', done)
 //   })
 // })
+
+// combined mongodb and elasticsearch
+// beforeEach(done => {
+//   indexingdb({
+//     MONGO_HOST: 'localhost',
+//     MONGO_PORT: 27017,
+//     MONGO_DB: 'skohub-test',
+//     ES_NODE: 'http://localhost:9200',
+//     ES_INDEX: 'skohub-test'
+//   }).then(db => {
+//     server = activitypub(db).listen(0, '127.0.0.1', done)
+//   })
+// })
+
 afterEach(done => server.close(done))
 
 describe('Webfinger', () => {
