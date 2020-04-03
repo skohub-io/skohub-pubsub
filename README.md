@@ -7,6 +7,7 @@ Dependencies:
 
 - elasticsearch 6.8
 - mongodb
+- node-version >= v12.16.1
 
 Basic setup:
 
