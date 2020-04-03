@@ -1,0 +1,9 @@
+# $YOUR_SKOHUB_PUBSUB_UID and $YOUR_SKOHUB_PUBSUB_GID must be set to your need
+# and then copied to /etc/monit/conf.d/
+# first, ensure to have copied the init.d sript to its place
+check host skohub-pubsub with address 127.0.0.1
+   start program = "/bin/bash /etc/init.d/skohub-pubsub.sh start"
+   stop program = "/bin/bash /etc/init.d/skohub-pubsub.sh stop"
+   as uid $YOUR_SKOHUB_PUBSUB_UID and gid $YOUR_SKOHUB_PUBSUB_GID
+   if failed host 127.0.0.1 port 3000 then start
+   if 5 restarts within 5 cycles then timeout
