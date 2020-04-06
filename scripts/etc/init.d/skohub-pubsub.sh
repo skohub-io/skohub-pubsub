@@ -24,13 +24,17 @@ DAEMON_START_SCRIPT=$HOME_SKOHUB/start.sh
 NAME=skohub-pubsub
 PID_FILE=$HOME_SKOHUB/$NAME.pid
 DESC="skohub-pubsub as a node server"
+RUN_AS_USER=lod
+
+###
+# nothing to change after this line
+###
 
 if [ -s $PID_FILE ]; then
    PID=$(cat $PID_FILE)
 fi
 test -x $DAEMON_START_SCRIPT || exit 0
 
-RUN_AS_USER=lod
 
 set -e
 
@@ -63,19 +67,17 @@ case "$1" in
             do_start
             case "$?" in
                 0)
-                   log_end_msg 0
+                   echo "Restarted succesfully"
                 ;;
                 1|*)
-                   log_end_msg 1 # Old process is still or failed to running
-                   print_error_msg
+                   echo "Failed to restart: old process is still or failed to running"
                    exit 1
                 ;;
             esac
         ;;
         *)
            # Failed to stop
-           log_end_msg 1
-           print_error_msg
+           echo "Failed to stop: old process is still or failed to running"
            exit 1
         ;;
     esac

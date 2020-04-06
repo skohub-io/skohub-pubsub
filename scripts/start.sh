@@ -10,10 +10,15 @@
 
 # config
 PORT=3000 # the port skohub runs at
-ES_NODE=http://localhost:9200 # where your elasticsearch runs
+ES_NODE=http://localhost:9222 # where your elasticsearch runs
 INDEX_NAME=skohub
 NAME=skohub-pubsub
 NODE_VERSION="v12.16.1"
+
+if [ -n "$(lsof -i:$PORT)" ]; then
+   echo "There is already a process running on port $PORT with an unexpected PID. Cancelling starting."
+   exit 1
+fi
 
 # install and use proper node version
 export NVM_DIR="$HOME/.nvm"
