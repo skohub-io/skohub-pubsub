@@ -31,3 +31,7 @@ Some actions may need certificates. These must reside in the `data` directory
 named as `private.pem` and `public.pem`.
 
 [^1]: Actor names are considered relative to the hostname of the server.
+
+# elasticsearch
+You need to run a properly configured `elasticsearch` instance by
+setting `cluster.name: skohub`. See the provided [elasticsearch.yml](scripts/etc/elasticsearch/elasticsearch.yml).

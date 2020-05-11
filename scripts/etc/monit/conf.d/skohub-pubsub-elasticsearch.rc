@@ -1,0 +1,6 @@
+# elasticsearch is required for skohub-pubsub and should also be supervised
+check host skohub-pubsub-elasticsearch with address 127.0.0.1
+    start program = "/bin/bash /etc/init.d/elasticsearch start"
+    stop program = "/bin/bash /etc/init.d/elasticsearch stop"
+    if failed host 127.0.0.1 port 9200 then start
+    if 5 restarts within 5 cycles then timeout

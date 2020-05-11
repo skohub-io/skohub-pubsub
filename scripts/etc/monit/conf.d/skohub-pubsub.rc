@@ -2,6 +2,7 @@
 # to your need
 # and then copied to /etc/monit/conf.d/
 # first, ensure to have copied the init.d sript to its place
+
 check host skohub-pubsub with address 127.0.0.1
    start program = "/bin/bash /etc/init.d/skohub-pubsub.sh start"
    stop program = "/bin/bash /etc/init.d/skohub-pubsub.sh stop"
