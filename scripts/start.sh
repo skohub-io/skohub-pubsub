@@ -10,7 +10,7 @@
 
 # config
 PORT=3000 # the port skohub runs at
-ES_NODE=http://localhost:9222 # where your elasticsearch runs
+ES_NODE=http://localhost:9200 # where your elasticsearch runs
 INDEX_NAME=skohub
 NAME=skohub-pubsub
 NODE_VERSION="v12.16.1"
