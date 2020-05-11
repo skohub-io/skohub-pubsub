@@ -5,12 +5,16 @@
 # Required-Start: $elasticsearch $mongodb
 # Description:    Script to start the skohub-pubsub server.
 #                 Use as standalone or in combination with
-#                 /etc/init.d/skohub-pubsub.sh.
+#                 /etc/init.d/skohub-pubsub.sh
 ####
 
 # config
 PORT=3000 # the port skohub runs at
 ES_NODE=http://localhost:9200 # where your elasticsearch runs
+# end config
+
+# NOTHING TO CHANGE BELOW THIS LINE
+
 INDEX_NAME=skohub
 NAME=skohub-pubsub
 NODE_VERSION="v12.16.1"
@@ -33,6 +37,7 @@ cd $HOME/git/$NAME/scripts
 # ensure elasticsearch index exists
 curl -XPUT $ES_NODE/skohub
 
+npm install
 # start skohub-pubsub
 MONGO_DB=$INDEX_NAME ES_INDEX=$INDEX_NAME ES_NODE=$ES_NODE PORT=$PORT npm start >> ../logs/$NAME.log 2>&1 &
 
