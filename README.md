@@ -1,8 +1,7 @@
 # skohub-pubsub
 
 This part provides the [SkoHub](http://skohub.io) core infrastructure, setting up basic inboxes for
-subjects plus the ability of subscribing to push notifications for those inboxes.
-
+subjects plus the ability of subscribing to push notifications for those inboxes. For usage and implementation details see the [blog post](https://blog.lobid.org/2020/06/25/skohub-pubsub.html).
 Dependencies:
 
 - elasticsearch 6.8
