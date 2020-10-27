@@ -1,0 +1,15 @@
+{
+   "mappings" : {
+      "_doc" : {
+         "properties" : {
+            "attachment" : {
+               "properties" : {
+                  "@context" : {
+                     "enabled" : false
+                  }
+               }
+            }
+         }
+      }
+   }
+}
