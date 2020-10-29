@@ -34,8 +34,8 @@ cd $HOME/git/$NAME/scripts
 ###
 # nothing to change from here
 ###
-# ensure elasticsearch index exists
-curl -XPUT $ES_NODE/skohub
+# ensure elasticsearch index exists and initialize proper mappings
+curl -XPUT $ES_NODE/skohub -H 'Content-Type: application/json' -d "@elasticsearch-mappings.json"
 
 npm install
 # start skohub-pubsub

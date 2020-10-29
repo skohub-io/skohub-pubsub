@@ -31,6 +31,13 @@ named as `private.pem` and `public.pem`.
 
 [^1]: Actor names are considered relative to the hostname of the server.
 
-# elasticsearch
+## elasticsearch
 You need to run a properly configured `elasticsearch` instance by
-setting `cluster.name: skohub`. See the provided [elasticsearch.yml](scripts/etc/elasticsearch/elasticsearch.yml).
+setting `cluster.name: skohub`. See the provided [elasticsearch.yml](scripts/etc/elasticsearch/elasticsearch.yml). Also, in some contexts, it's mandatory to initialize elasticsearch
+with a proper [index-mapping](scripts/elasticsearch-mappings.json).
+
+## start scripts
+You may want to use the start script in `scripts/start.sh`. This script ensures the proper
+installation of skohub-pubsub and the configuration of elasticsearch. There also reside
+further scripts to manage the starting/stopping of the skohub-pubsub via init and to
+monitor the processes with `monit`.
