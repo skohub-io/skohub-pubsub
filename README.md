@@ -10,7 +10,7 @@ Dependencies:
 
 Basic setup:
 
-    $ git clone https://github.com/hbz/skohub-pubsub.git
+    $ git clone https://github.com/skohub-io/skohub-pubsub.git
     $ cd skohub-pubsub
     $ npm install
     $ npm test
