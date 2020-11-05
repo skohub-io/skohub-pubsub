@@ -41,3 +41,9 @@ You may want to use the start script in `scripts/start.sh`. This script ensures 
 installation of skohub-pubsub and the configuration of elasticsearch. There also reside
 further scripts to manage the starting/stopping of the skohub-pubsub via init and to
 monitor the processes with `monit`.
+
+## Credits
+
+The project to create a stable beta version of SkoHub has been funded by the North-Rhine Westphalian Library Service Centre (hbz) and carried out in cooperation with [graphthinking GmbH](https://graphthinking.com/) in 2019/2020.
+
+<a target="_blank" href="https://www.hbz-nrw.de"><img src="https://skohub-io.github.io/skohub.io/img/hbz-logo.svg" width="120px"></a>
