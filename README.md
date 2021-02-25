@@ -1,3 +1,7 @@
+# Build
+
+![https://github.com/hbz/skohub-pubsub/actions?query=workflow%3ABuild](https://github.com/hbz/skohub-pubsub/workflows/Build/badge.svg?branch=master)
+
 # skohub-pubsub
 
 This part provides the [SkoHub](http://skohub.io) core infrastructure, setting up basic inboxes for
