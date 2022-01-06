@@ -50,7 +50,7 @@
     "express": "^4.16.4",
     "mongodb": "^3.4.1",
     "morgan": "^1.9.1",
-    "parse-link-header": "^1.0.1",
+    "parse-link-header": "^2.0.0",
     "superagent": "^4.1.0",
     "ws": "^6.2.0"
   }
