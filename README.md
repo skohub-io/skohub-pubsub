@@ -1,5 +1,9 @@
 # Build
 
+| :exclamation:  Due to lacking resources for maintenance, in 2022 we decided to shut down the SkoHub PubSub demo server at skohub.io and to stop development. This repo is now an archive.   |
+|----------------------------------------------|
+
+
 ![https://github.com/hbz/skohub-pubsub/actions?query=workflow%3ABuild](https://github.com/hbz/skohub-pubsub/workflows/Build/badge.svg?branch=master)
 
 # skohub-pubsub
